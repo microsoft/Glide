@@ -1,0 +1,13 @@
+repositories:
+  ros_qwiic_servo:
+    type: git
+    url: https://github.com/joncamp/ros_qwiic_servo
+    version: main
+  microros_ws/src/micro_ros_setup:
+    type: git
+    url: https://github.com/micro-ROS/micro_ros_setup.git
+    version: foxy
+  teleop_twist_keyboard:
+    type: git
+    url: https://github.com/ros2/teleop_twist_keyboard
+    version: dashing

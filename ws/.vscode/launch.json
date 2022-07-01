@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ROS: Launch BME280",
+            "type": "ros",
+            "request": "launch",
+            "target": "/ws/src/ros_qwiic_bme280/launch/ros_qwiic_bme280.launch.py"
+        },
+        {
+            "name": "ROS: Launch IMU",
+            "request": "launch",
+            "target": "/ws/src/ros_qwiic_ICM_20948/launch/qwiic.launch.py",
+            "type": "ros"
+        },
+        {
+            "name": "ROS: Launch motors",
+            "request": "launch",
+            "target": "/ws/src/ros_qwiic_motor/launch/qwiic.launch.py",
+            "type": "ros"
+        },
+        {
+            "name": "ROS: Launch tof",
+            "request": "launch",
+            "target": "/ws/src/ros_qwiic_tof/launch/qwiic.launch.py",
+            "type": "ros"
+        },
+        {
+            "name": "ROS: Launch servo",
+            "request": "launch",
+            "target": "/ws/src/ros_qwiic_servo/launch/qwiic.launch.py",
+            "type": "ros"
+        },
+        {
+            "name": "ROS: Launch env",
+            "request": "launch",
+            "target": "/ws/src/ros_qwiic_envsensor/launch/qwiic.launch.py",
+            "type": "ros"
+        }
+        
+    ]
+}

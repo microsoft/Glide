@@ -1,0 +1,22 @@
+
+version: '3.4'
+
+services:
+  glide:
+    image: glide
+    network_mode: "host"
+    privileged: true
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined   
+    volumes:
+      - ./ws:/ws
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    devices:
+      - /dev:/dev
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: /bin/sh -c "while sleep 1000; do :; done"

@@ -1,14 +1,26 @@
-# Project
+# Glide
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+## Setup
+This repository serves the the container root for the ROS2 workspace for the Jetbot code by a Polyhobbyist. The intention is for this repo to be cloned on the host operating system, and use Docker compose or VSCode DevContainers to start a ROS2 container to work in.
 
-As the maintainer of this project, please make a few updates:
+First, clone this repository onto your Jetson. The location doesn't matter.
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+### Using Docker directly
+``` bash
+setup.sh
+Docker-compose -f Docker-compose.yaml up
+```
+
+### Using Docker directly
+``` bash
+docker exec -it jetbot_jetbot_1 /bin/bash
+/ws/src/build_src.sh
+```
+
+### Using VSCode Dev containers
+Ensure that you have the remote extension pack installed.
+Open the Jetbot folder within VSCode. 
+When VSCode asks to open the Devcontainer, [you say yes](https://youtu.be/jCe5vfQx50c?t=118).
 
 ## Contributing
 
