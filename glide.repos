@@ -3,6 +3,9 @@ repositories:
     type: git
     url: https://github.com/joncamp/ros_qwiic_servo
     version: main
+  ros_qwiic_ICM_20948:
+    type: git
+    url: https://github.com/polyhobbyist/ros_qwiic_ICM_20948
   microros_ws/src/micro_ros_setup:
     type: git
     url: https://github.com/micro-ROS/micro_ros_setup.git

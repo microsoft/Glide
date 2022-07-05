@@ -1,7 +1,7 @@
 #!/bin/bash
 
 mkdir -p ws/src
-vcs import --recursive --input jetbot.repos ws/src
+vcs import --recursive --input glide.repos ws/src
 
 cp build_src.sh ws/src/
 
@@ -15,5 +15,5 @@ echo "./connect.sh"
 echo "/ws/src/build_src.sh"
 echo
 echo "To start glide:"
-echo "ros2 run glide glide.launch.py"
+echo "ros2 launch glide glide.launch.py"
 echo

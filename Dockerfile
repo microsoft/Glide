@@ -17,7 +17,8 @@ RUN apt-get update && \
         libi2c-dev \
         build-essential \
         ros-$ROS_DISTRO-realsense2-camera \
-        ros-$ROS_DISTRO-realsense2-description
+        ros-$ROS_DISTRO-realsense2-description \
+        ros-$ROS_DISTRO-imu-tools
 
 ENV WORKSPACE_ROOT=/ws
 RUN echo 'source /opt/ros/foxy/setup.bash' >> /root/.bashrc && \
