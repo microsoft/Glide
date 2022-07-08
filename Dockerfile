@@ -18,7 +18,9 @@ RUN apt-get update && \
         build-essential \
         ros-$ROS_DISTRO-realsense2-camera \
         ros-$ROS_DISTRO-realsense2-description \
-        ros-$ROS_DISTRO-imu-tools
+        ros-$ROS_DISTRO-imu-tools \
+        ros-$ROS_DISTRO-joint-state-publisher-gui \
+        ros-$ROS_DISTRO-xacro
 
 ENV WORKSPACE_ROOT=/ws
 RUN echo 'source /opt/ros/foxy/setup.bash' >> /root/.bashrc && \

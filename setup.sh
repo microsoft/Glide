@@ -3,8 +3,6 @@
 mkdir -p ws/src
 vcs import --recursive --input glide.repos ws/src
 
-cp build_src.sh ws/src/
-
 echo
 echo
 echo "To Run:"
