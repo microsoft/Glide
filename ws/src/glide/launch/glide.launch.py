@@ -38,15 +38,58 @@ def generate_launch_description():
 
     # ros2 run cmdvel_to_servo cmdvel_to_servo_node
     cmdvel_to_servo = Node(
-        package='cmdvel_to_servo',
-        executable='cmdvel_to_servo_node',
-        name='cmdvel_to_servo',
-        output='screen',
-    )
+            package='cmdvel_to_servo',
+            executable='cmdvel_to_servo_node',
+            name='cmdvel_to_servo',
+            output='screen',
+            parameters=[
+                {'bus': '/dev/i2c-8'},
+            ]
+        )
+
+    ros_qwiic_icm_20948 = Node(
+            package='ros_qwiic_ICM_20948',
+            executable='ros_qwiic_icm_20948',
+            name='ros_qwiic_icm_20948',
+            output='screen',
+            parameters=[
+                {'bus': '/dev/i2c-8'},
+            ]
+        )
+
+    # ros2 launch imu_filter_madgwick imu_filter.launch.py
+    imu_filter_madgwick_dir = get_package_share_directory('imu_filter_madgwick')
+    imu_filter_madgwick = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([imu_filter_madgwick_dir, '/launch/imu_filter.launch.py'])
+        )
+
+    ros_qwiic_tof = Node(
+            package='ros_qwiic_tof',
+            executable='ros_qwiic_tof',
+            name='ros_qwiic_tof',
+            output='screen',
+            parameters=[
+                {'bus': '/dev/i2c-8'},
+            ]
+        )
+
+    ros_qwiic_dual_encoder = Node(
+            package='ros_qwiic_dual_encoder',
+            executable='ros_qwiic_dual_encoder',
+            name='ros_qwiic_dual_encoder',
+            output='screen',
+            parameters=[
+                {'bus': '/dev/i2c-8'},
+            ]
+        )
                         
     return LaunchDescription([
         ros_qwiic_servo,
         micro_ros_agent,
         cmdvel_to_servo,
-        realsense2_camera
+        realsense2_camera,
+        ros_qwiic_icm_20948,
+        imu_filter_madgwick,
+        ros_qwiic_dual_encoder,
+        ros_qwiic_tof
     ])
