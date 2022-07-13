@@ -88,8 +88,8 @@ def generate_launch_description():
         micro_ros_agent,
         cmdvel_to_servo,
         realsense2_camera,
-        ros_qwiic_icm_20948,
-        imu_filter_madgwick,
-        ros_qwiic_dual_encoder,
-        ros_qwiic_tof
+        # ros_qwiic_icm_20948,
+        # imu_filter_madgwick,
+        # ros_qwiic_dual_encoder,
+        # ros_qwiic_tof
     ])
