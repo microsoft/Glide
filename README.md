@@ -12,7 +12,7 @@ run.sh
 ### Using Docker directly
 ``` bash
 connect.sh
-/ws/src/build_src.sh
+/ws/src/rebuild.sh
 ```
 
 ## Contributing
