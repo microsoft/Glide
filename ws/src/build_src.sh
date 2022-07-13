@@ -4,7 +4,7 @@ echo "Building Micro ROS"
 echo
 cd /ws/src/microros_ws
 rosdep install --from-path src --ignore-src -y
-colcon build
+colcon build --symlink-install --event-handlers console_cohesion+ --base-paths /ws --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
 source install/local_setup.bash
 ros2 run micro_ros_setup create_agent_ws.sh
 ros2 run micro_ros_setup build_agent.sh
@@ -14,11 +14,11 @@ echo
 echo "Building remaining packages"
 echo
 cd /ws/src
-colcon build
+colcon build --symlink-install --event-handlers console_cohesion+ --base-paths /ws --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
 echo
-echo "Rebuilding packages to handle "
+echo "Rebuilding packages to handle i2c header issue"
 echo
-colcon build
+colcon build --symlink-install --event-handlers console_cohesion+ --base-paths /ws --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
 source install/local_setup.bash
 
