@@ -20,6 +20,8 @@ To view the urdf run:
 ros2 launch glide_robot vis_urdf.launch.py
 ```
 
+Update `hwlabcorridor.world` in the `worlds` folder to include the correct path the the mesh.
+
 To navigate the robot to a goal location run:
 ```
 ros2 launch glide_robot navigate.launch.py
