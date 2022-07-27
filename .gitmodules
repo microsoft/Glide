@@ -6,3 +6,11 @@
 	path = sim_ws/src/depthimage_to_laserscan
 	url = https://github.com/ros-perception/depthimage_to_laserscan.git
 	branch = foxy-devel
+[submodule "sim_ws/src/teb_local_planner"]
+	path = sim_ws/src/teb_local_planner
+	url = https://github.com/rst-tu-dortmund/teb_local_planner.git
+	branch = foxy-devel
+[submodule "sim_ws/costmap_converter"]
+	path = sim_ws/costmap_converter
+	url = https://github.com/rst-tu-dortmund/costmap_converter
+	branch = ros2

@@ -147,7 +147,8 @@
     </joint> -->
   
 
-  <link name="base_link">
+  <link name="base_link"/>
+  <link name="base_footprint">
     <visual>
       <geometry>
         <box size="${body_length} ${body_width} ${body_height}"/>
@@ -159,6 +160,11 @@
   <gazebo reference="base_link">
       <material>Gazebo/Blue</material>
   </gazebo>
+  <joint name="base_joint" type="fixed">
+      <origin rpy="0 3.14 1.57" xyz="0 0 0"/>
+      <parent link="base_link"/>
+      <child link="base_footprint"/>
+  </joint>
 
   <!-- <xacro:bar name="front" x_offset="${1.25*body_width}" z_offset="-${body_width}" parent_link="steer_bar_link"/> -->
   <xacro:steer_wheel name="right" offset="-0.1" xy_reflect="-1"/>
@@ -170,7 +176,7 @@
   <!-- <xacro:steer_wheel name="rear_left" offset="0" xy_reflect="1" parent="rear_bar_link"/> -->
   <xacro:rotate_wheel name="right" offset="-0.1" xy_reflect="-1" />
   <xacro:rotate_wheel name="left" offset="-0.1" xy_reflect="1" />
-<link name="camera_bottom_screw_frame">
+<!-- <link name="camera_bottom_screw_frame">
     <visual>
       <geometry>
           <box size="0.02505 0.090 0.025"/>
@@ -181,7 +187,7 @@
           <box size="0.02505 0.090 0.025"/>
       </geometry>
     </collision>
-  </link>
+  </link> -->
 
   <link name="camera_link"></link>
 
@@ -202,14 +208,14 @@
   <link name="camera_right_ir_optical_frame"></link>
 
 
-   <joint name="camera_joint" type="fixed">
+   <!-- <joint name="camera_joint" type="fixed">
     <parent link="base_link" />
     <child link="camera_bottom_screw_frame" />
     <pose xyz="0.4 0 0.25" rpy="0 0 0" />
-  </joint>
+  </joint> -->
 
   <joint name="camera_link_joint" type="fixed">
-    <parent link="camera_bottom_screw_frame" />
+    <parent link="base_link" />
     <child link="camera_link" />
     <pose xyz="0 0.0175 0.0125 " rpy="0 0 0" />
   </joint>
