@@ -10,7 +10,7 @@
 	path = sim_ws/src/teb_local_planner
 	url = https://github.com/rst-tu-dortmund/teb_local_planner.git
 	branch = foxy-devel
-[submodule "sim_ws/costmap_converter"]
-	path = sim_ws/costmap_converter
+[submodule "sim_ws/src/costmap_converter"]
+	path = sim_ws/src/costmap_converter
 	url = https://github.com/rst-tu-dortmund/costmap_converter
 	branch = ros2
