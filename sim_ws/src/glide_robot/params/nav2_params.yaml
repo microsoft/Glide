@@ -12,7 +12,7 @@ amcl:
     beam_skip_threshold: 0.3
     do_beamskip: false
     global_frame_id: "map"
-    initial_pose: [0.0, 0.0, 0.0, 0.0]
+    # initial_pose: [0.0, 0.0, 0.0, 0.0]
     lambda_short: 0.1
     laser_likelihood_max_dist: 2.0
     laser_max_range: 100.0
@@ -29,7 +29,7 @@ amcl:
     resample_interval: 1
     robot_model_type: "differential"
     save_pose_rate: 0.5
-    set_initial_pose: True
+    # set_initial_pose: True
     sigma_hit: 0.2
     tf_broadcast: true
     transform_tolerance: 1.0
@@ -110,9 +110,9 @@ controller_server:
     FollowPath:
       plugin: "teb_local_planner::TebLocalPlannerROS"
       footprint_model.type: circular
-      footprint_model.radius: 0.3
-      min_obstacle_dist: 0.5
-      inflation_dist: 0.2
+      footprint_model.radius: 0.2
+      min_obstacle_dist: 0.2
+      inflation_dist: 0.1
       costmap_converter_plugin: costmap_converter::CostmapToPolygonsDBSMCCH
       costmap_converter_spin_thread: True
       costmap_converter_rate: 15.0
@@ -122,7 +122,7 @@ controller_server:
       optimization_verbose: False
       teb_autoresize: True
       min_samples: 3
-      max_samples: 100
+      max_samples: 200
       max_global_plan_lookahead_dist: 1.0
       visualize_hc_graph: True
       max_vel_x: 0.26
@@ -130,9 +130,10 @@ controller_server:
       max_vel_backwards: 0.0
       acc_lim_x: 2.5
       acc_lim_theta: 1.25
-      min_turning_radius: 1.0       # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
+      min_turning_radius: 0.85       # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
       wheelbase: 0.145                 # Wheelbase of our robot
       cmd_angle_instead_rotvel: True # stage simulator takes the angle instead of the rotvel as input (twist message)
+      global_plan_overwrite_orientation: True
 
       # plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
       # desired_linear_vel: 0.5
@@ -176,12 +177,12 @@ local_costmap:
       width: 10
       height: 10
       resolution: 0.05
-      robot_radius: 0.75
+      robot_radius: 0.25
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.2
+        inflation_radius: 0.1
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -216,7 +217,7 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: True
-      robot_radius: 0.7
+      robot_radius: 0.25
       resolution: 0.05
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
@@ -236,7 +237,7 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.2
+        inflation_radius: 0.1
       always_send_full_costmap: True
   global_costmap_client:
     ros__parameters:
@@ -265,8 +266,8 @@ planner_server:
     use_sim_time: True
 
     GridBased:
-      # plugin: "smac_planner/SmacPlanner2D"
-      plugin: "nav2_navfn_planner/NavfnPlanner"
+      plugin: "smac_planner/SmacPlanner"
+      # plugin: "nav2_navfn_planner/NavfnPlanner"
       downsample_costmap: false           # whether or not to downsample the map
       downsampling_factor: 1              # multiplier for the resolution of the costmap layer (e.g. 2 on a 5cm costmap would be 10cm)
       allow_unknown: true                 # allow traveling in unknown space
@@ -276,7 +277,7 @@ planner_server:
       angle_quantization_bins: 72         # Number of angle bins for search
       analytic_expansion_ratio: 3.5       # The ratio to attempt analytic expansions during search for final approach.
       analytic_expansion_max_length: 3.0  # For Hybrid/Lattice nodes: The maximum length of the analytic expansion to be considered valid to prevent unsafe shortcutting
-      minimum_turning_radius: 1.0       # minimum turning radius in m of path / vehicle
+      minimum_turning_radius: 0.85       # minimum turning radius in m of path / vehicle
       reverse_penalty: 10.0                # Penalty to apply if motion is reversing, must be => 1
       change_penalty: 0.0                 # Penalty to apply if motion is changing directions (L to R), must be >= 0
       non_straight_penalty: 1.0           # Penalty to apply if motion is non-straight, must be => 1
@@ -286,9 +287,9 @@ planner_server:
       cache_obstacle_heuristic: false     # Cache the obstacle map dynamic programming distance expansion heuristic between subsiquent replannings of the same goal location. Dramatically speeds up replanning performance (40x) if costmap is largely static.
       smooth_path: True                   # If true, does a simple and quick smoothing post-processing to the path
       tolerance: 0.5
-      use_astar: false
+      use_astar: true
       allow_unknown: true
-
+      use_final_approach_orientation: true
       smoother:
         max_iterations: 1000
         w_smooth: 0.3
@@ -316,7 +317,7 @@ recoveries_server:
     robot_base_frame: base_link
     transform_timeout: 0.1
     use_sim_time: True
-    simulate_ahead_time: 2.0
+    simulate_ahead_time: 1.0
     max_rotational_vel: 1.0
     min_rotational_vel: 0.4
     rotational_acc_lim: 3.2
