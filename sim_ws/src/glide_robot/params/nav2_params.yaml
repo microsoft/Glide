@@ -27,7 +27,7 @@ amcl:
     recovery_alpha_fast: 0.0
     recovery_alpha_slow: 0.0
     resample_interval: 1
-    robot_model_type: "differential"
+    robot_model_type: "ackermann"
     save_pose_rate: 0.5
     # set_initial_pose: True
     sigma_hit: 0.2
@@ -108,31 +108,66 @@ controller_server:
       yaw_goal_tolerance: 3.14
       stateful: True
     FollowPath:
+      # plugin: "dwb_core::DWBLocalPlanner"
+      # debug_trajectory_details: True
+      # min_vel_x: 0.0
+      # min_vel_y: 0.0
+      # max_vel_x: 0.26
+      # max_vel_y: 0.0
+      # max_vel_theta: 0.8
+      # min_speed_xy: 0.0
+      # max_speed_xy: 0.26
+      # min_speed_theta: 0.0
+      # acc_lim_x: 2.5
+      # acc_lim_y: 0.0
+      # acc_lim_theta: 3.2
+      # decel_lim_x: -2.5
+      # decel_lim_y: 0.0
+      # decel_lim_theta: -3.2
+      # vx_samples: 20
+      # vy_samples: 5
+      # vtheta_samples: 20
+      # sim_time: 1.7
+      # linear_granularity: 0.05
+      # angular_granularity: 0.025
+      # transform_tolerance: 0.2
+      # xy_goal_tolerance: 0.25
+      # trans_stopped_velocity: 0.25
+      # short_circuit_trajectory_evaluation: True
+      # stateful: True
+      # critics: ["Oscillation", "BaseObstacle", "PathAlign", "PathDist", "GoalDist"]
+      # BaseObstacle.scale: 0.02
+      # PathAlign.scale: 32.0
+      # PathAlign.forward_point_distance: 0.1
+      # PathDist.scale: 32.0
+      # GoalDist.scale: 24.0
+
       plugin: "teb_local_planner::TebLocalPlannerROS"
       footprint_model.type: circular
       footprint_model.radius: 0.2
-      min_obstacle_dist: 0.2
-      inflation_dist: 0.1
-      costmap_converter_plugin: costmap_converter::CostmapToPolygonsDBSMCCH
+      min_obstacle_dist: 0.4
+      inflation_dist: 0.4
+      costmap_converter_plugin: costmap_converter::CostmapToLinesDBSMCCH
       costmap_converter_spin_thread: True
       costmap_converter_rate: 15.0
-      enable_homotopy_class_planning: True
+      enable_homotopy_class_planning: False
       enable_multithreading: True
       #weight_obstacle: 100.0
       optimization_verbose: False
+      weight_kinematics_turning_radius: 1.0
       teb_autoresize: True
       min_samples: 3
       max_samples: 200
       max_global_plan_lookahead_dist: 1.0
       visualize_hc_graph: True
       max_vel_x: 0.26
-      max_vel_theta: 1.25
+      max_vel_theta: 0.9
       max_vel_backwards: 0.0
       acc_lim_x: 2.5
-      acc_lim_theta: 1.25
-      min_turning_radius: 0.85       # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
+      acc_lim_theta: 0.9
+      min_turning_radius: 0.6       # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
       wheelbase: 0.145                 # Wheelbase of our robot
-      cmd_angle_instead_rotvel: True # stage simulator takes the angle instead of the rotvel as input (twist message)
+      cmd_angle_instead_rotvel: true # stage simulator takes the angle instead of the rotvel as input (twist message)
       global_plan_overwrite_orientation: True
 
       # plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
@@ -143,23 +178,25 @@ controller_server:
       # min_lookahead_dist: 0.3
       # max_lookahead_dist: 0.9
       # lookahead_time: 1.5
-      # rotate_to_heading_angular_vel: 1.8
+      # rotate_to_heading_angular_vel: 0.8
       # transform_tolerance: 0.1
       # use_velocity_scaled_lookahead_dist: false
       # min_approach_linear_velocity: 0.05
       # use_approach_linear_velocity_scaling: true
-      # max_allowed_time_to_collision: 1.0
+      # max_allowed_time_to_collision: 2.0
       # use_regulated_linear_velocity_scaling: true
       # use_cost_regulated_linear_velocity_scaling: false
       # regulated_linear_scaling_min_radius: 0.9
       # regulated_linear_scaling_min_speed: 0.25
-      # use_rotate_to_heading: true
+      # use_rotate_to_heading: false
+      # use_interpolation: true
       # rotate_to_heading_min_angle: 0.785
       # max_angular_accel: 3.2
       # goal_dist_tol: 0.25
       # cost_scaling_dist: 0.3
       # cost_scaling_gain: 1.0
       # inflation_cost_scaling_factor: 3.0
+      # approach_velocity_scaling_dist: 0.05
 
 controller_server_rclcpp_node:
   ros__parameters:
@@ -182,7 +219,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.1
+        inflation_radius: 0.3
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -237,7 +274,7 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.1
+        inflation_radius: 0.3 
       always_send_full_costmap: True
   global_costmap_client:
     ros__parameters:
@@ -277,19 +314,19 @@ planner_server:
       angle_quantization_bins: 72         # Number of angle bins for search
       analytic_expansion_ratio: 3.5       # The ratio to attempt analytic expansions during search for final approach.
       analytic_expansion_max_length: 3.0  # For Hybrid/Lattice nodes: The maximum length of the analytic expansion to be considered valid to prevent unsafe shortcutting
-      minimum_turning_radius: 0.85       # minimum turning radius in m of path / vehicle
+      minimum_turning_radius: 0.3       # minimum turning radius in m of path / vehicle
       reverse_penalty: 10.0                # Penalty to apply if motion is reversing, must be => 1
-      change_penalty: 0.0                 # Penalty to apply if motion is changing directions (L to R), must be >= 0
-      non_straight_penalty: 1.0           # Penalty to apply if motion is non-straight, must be => 1
-      cost_penalty: 3.0                   # Penalty to apply to higher cost areas when adding into the obstacle map dynamic programming distance expansion heuristic. This drives the robot more towards the center of passages. A value between 1.3 - 3.5 is reasonable.
+      change_penalty: 1.0                 # Penalty to apply if motion is changing directions (L to R), must be >= 0
+      non_straight_penalty: 5.0           # Penalty to apply if motion is non-straight, must be => 1
+      cost_penalty: 10.0                   # Penalty to apply to higher cost areas when adding into the obstacle map dynamic programming distance expansion heuristic. This drives the robot more towards the center of passages. A value between 1.3 - 3.5 is reasonable.
       retrospective_penalty: 0.015
       lookup_table_size: 20.0             # Size of the dubin/reeds-sheep distance window to cache, in meters.
       cache_obstacle_heuristic: false     # Cache the obstacle map dynamic programming distance expansion heuristic between subsiquent replannings of the same goal location. Dramatically speeds up replanning performance (40x) if costmap is largely static.
       smooth_path: True                   # If true, does a simple and quick smoothing post-processing to the path
       tolerance: 0.5
-      use_astar: true
+      use_astar: false
       allow_unknown: true
-      use_final_approach_orientation: true
+      use_final_approach_orientation: false
       smoother:
         max_iterations: 1000
         w_smooth: 0.3
@@ -318,7 +355,7 @@ recoveries_server:
     transform_timeout: 0.1
     use_sim_time: True
     simulate_ahead_time: 1.0
-    max_rotational_vel: 1.0
+    max_rotational_vel: 0.8
     min_rotational_vel: 0.4
     rotational_acc_lim: 3.2
 

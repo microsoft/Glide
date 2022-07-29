@@ -151,7 +151,7 @@
   <link name="base_link">
     <visual>
       <geometry>
-        <box size="${body_length} ${body_width} ${body_height}"/>
+        <box size="${body_width} ${body_length} ${body_height}"/>
       </geometry>
       <origin rpy="0 0 1.57" xyz="0 0 ${body_center}"/>
       <material name="blue"/>
@@ -277,7 +277,7 @@
     </visual>
   </link>
   <joint name="base_to_human" type="fixed">
-    <origin rpy="0 ${degrees_90} 0" xyz="0.0 -1.0 ${2*wheel_radius}"/>
+    <origin rpy="0 ${degrees_90} 0" xyz="-1.0 0.0 ${2*wheel_radius}"/>
     <parent link="base_link"/>
     <child link="human_link"/>
   </joint>
