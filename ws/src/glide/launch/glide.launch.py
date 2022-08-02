@@ -25,8 +25,8 @@ def generate_launch_description():
     realsense2_camera_dir = get_package_share_directory('realsense2_camera')
     realsense2_camera = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([realsense2_camera_dir, '/launch/rs_launch.py']),
-            launch_arguments={'align_depth':'true', 'depth_width':'424', 'depth_height': '240', 'depth_fps':'15.0',
-                'color_width':'640', 'color_height':'360','color_fps':'15.0', 'enable_gyro':'true', 'enable_accel':'true'}.items()
+            launch_arguments={'align_depth':'true', 'depth_width':'640', 'depth_height': '360', 'depth_fps':'15.0',
+                'color_width':'640', 'color_height':'360','color_fps':'15.0', 'enable_gyro':'true', 'enable_accel':'true', 'unite_imu_method':'copy'}.items()
         )
 
     # ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyACM0
@@ -46,13 +46,33 @@ def generate_launch_description():
         output='screen',
     )
 
+    param_config = os.path.join(get_package_share_directory('depthimage_to_laserscan'), 'cfg', 'param.yaml')
+    depth_to_laser_scan = Node(
+        package='depthimage_to_laserscan',
+        executable='depthimage_to_laserscan_node',
+        name='depthimage_to_laserscan_node',
+        remappings=[('depth','/camera/depth/image_rect_raw'),
+                    ('depth_camera_info', '/camera/depth/camera_info')],
+        parameters=[param_config]
+    )
+
     parameters=[{
           'frame_id':'base_footprint',
           'subscribe_depth':True,
-          'approx_sync':True}]
+        #   'subscribe_rgbd': True,
+          'imu_topic':'/camera/imu/sample',
+          'wait_imu_to_init': True,
+          'subscribe_scan': True,
+          'approx_sync':False,
+        #   "fill_holes_size": 2,
+          "visual_odometry":True,
+          "publish_null_when_lost": False,
+          "Odom/ResetCountdown": "1"}]
 
     remappings=[
           ('rgb/image', '/camera/color/image_raw'),
+          ('imu', '/imu/data'),
+        #   ('rgbd/image', "/camera/aligned_depth_to_color/image_raw")
           ('rgb/camera_info', '/camera/color/camera_info'),
           ('depth/image', '/camera/aligned_depth_to_color/image_raw')]
 
@@ -67,6 +87,20 @@ def generate_launch_description():
         parameters=parameters,
         remappings=remappings,
         arguments=['-d']
+    )
+
+    config_dir = os.path.join(get_package_share_directory('imu_filter_madgwick'), 'config')
+    imu_filter = Node(
+        package='imu_filter_madgwick',
+        node_executable='imu_filter_madgwick_node',
+        node_name='imu_filter',
+        output='screen',
+        parameters=[{
+            'use_mag':False,
+            'publish_tf':False,
+            'world_frame':"enu"
+        }],
+        remappings=[('/imu/data_raw', '/camera/imu')]
     )
 
     base_to_realsense = Node(
@@ -104,8 +138,10 @@ def generate_launch_description():
         micro_ros_agent,
         cmdvel_to_servo,
         realsense2_camera,
+        depth_to_laser_scan,
         rgbd_odometry,
         rtabmap,
+        imu_filter,
         base_to_realsense,
         base_to_front_left_wheel,
         base_to_front_right_wheel,
