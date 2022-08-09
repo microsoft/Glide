@@ -9,7 +9,10 @@ sudo apt install ros-foxy-navigation2 ros-foxy-nav2-bringup ros-foxy-joint-state
 Build the workspace:
 ```bash
 export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:<path-to>/Glide/sim_ws/src/glide_robot/models/
-cd Glide/sim_ws/
+cd Glide/
+git submodule init
+git submodule update
+cd sim_ws/
 colcon build
 source install/setup.bash
 ```
