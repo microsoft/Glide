@@ -84,7 +84,7 @@
 
     <joint name="front_${name}_wheel_joint" type="revolute">
       <limit lower="-0.6" upper="0.6" effort="100" velocity="1"/>
-      <origin rpy="${degrees_90} 0 ${pi}" xyz="${offset + wheel_offset} ${xy_reflect * (wheel_gap + body_width/2)} ${wheel_radius}"/>
+      <origin rpy="${degrees_90} 0 ${pi}" xyz="${offset + wheel_offset} ${xy_reflect * (wheel_gap + body_width/2)} ${wheel_radius + 0.03}"/>
       <parent link="base_link"/>
       <child link="front_${name}_wheel"/>
       <axis xyz="0 1 0"/>
@@ -116,7 +116,7 @@
       </inertial> 
     </link>
     <joint name="rear_${name}_wheel_joint" type="continuous">
-      <origin rpy="${degrees_90} 0 ${pi}" xyz="-1.0 ${xy_reflect * (wheel_gap + body_width/2)} ${wheel_radius}"/>
+      <origin rpy="${degrees_90} 0 ${pi}" xyz="0 0 0"/>
       <parent link="base_link"/>
       <child link="rear_${name}_wheel"/>
       <axis xyz="0 0 1"/>
@@ -170,7 +170,7 @@
   <!-- <xacro:steer_wheel name="rear_left" offset="0" xy_reflect="1" parent="rear_bar_link"/> -->
   <xacro:rotate_wheel name="right" offset="-0.1" xy_reflect="-1" />
   <xacro:rotate_wheel name="left" offset="-0.1" xy_reflect="1" />
-<!-- <link name="camera_bottom_screw_frame">
+<link name="camera_bottom_screw_frame">
     <visual>
       <geometry>
           <box size="0.02505 0.090 0.025"/>
@@ -181,7 +181,7 @@
           <box size="0.02505 0.090 0.025"/>
       </geometry>
     </collision>
-  </link> -->
+  </link>
 
   <link name="camera_link"></link>
 
@@ -202,14 +202,14 @@
   <link name="camera_right_ir_optical_frame"></link>
 
 
-   <!-- <joint name="camera_joint" type="fixed">
+   <joint name="camera_joint" type="fixed">
     <parent link="base_link" />
     <child link="camera_bottom_screw_frame" />
     <pose xyz="0.4 0 0.25" rpy="0 0 0" />
-  </joint> -->
+  </joint>
 
   <joint name="camera_link_joint" type="fixed">
-    <parent link="base_link" />
+    <parent link="camera_bottom_screw_frame" />
     <child link="camera_link" />
     <pose xyz="0 0.0175 0.0125 " rpy="0 0 0" />
   </joint>

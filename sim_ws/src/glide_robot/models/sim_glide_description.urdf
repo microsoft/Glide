@@ -74,7 +74,7 @@
   </gazebo>
   <joint name="front_right_wheel_joint" type="revolute">
     <limit effort="100" lower="-0.6" upper="0.6" velocity="1"/>
-    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="-0.061900000000000004 -0.13175 0.077"/>
+    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="-0.061900000000000004 -0.13175 0.107"/>
     <parent link="base_link"/>
     <child link="front_right_wheel"/>
     <axis xyz="0 1 0"/>
@@ -107,7 +107,7 @@
   </gazebo>
   <joint name="front_left_wheel_joint" type="revolute">
     <limit effort="100" lower="-0.6" upper="0.6" velocity="1"/>
-    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="-0.061900000000000004 0.13175 0.077"/>
+    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="-0.061900000000000004 0.13175 0.107"/>
     <parent link="base_link"/>
     <child link="front_left_wheel"/>
     <axis xyz="0 1 0"/>
@@ -136,7 +136,7 @@
     </inertial>
   </link>
   <joint name="rear_right_wheel_joint" type="continuous">
-    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="-1.0 -0.13175 0.077"/>
+    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="0 0 0"/>
     <parent link="base_link"/>
     <child link="rear_right_wheel"/>
     <axis xyz="0 0 1"/>
@@ -164,23 +164,23 @@
     </inertial>
   </link>
   <joint name="rear_left_wheel_joint" type="continuous">
-    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="-1.0 0.13175 0.077"/>
+    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="0 0 0"/>
     <parent link="base_link"/>
     <child link="rear_left_wheel"/>
     <axis xyz="0 0 1"/>
   </joint>
-  <!-- <link name="camera_bottom_screw_frame">
+  <link name="camera_bottom_screw_frame">
     <visual>
       <geometry>
-          <box size="0.02505 0.090 0.025"/>
+        <box size="0.02505 0.090 0.025"/>
       </geometry>
     </visual>
     <collision>
       <geometry>
-          <box size="0.02505 0.090 0.025"/>
+        <box size="0.02505 0.090 0.025"/>
       </geometry>
     </collision>
-  </link> -->
+  </link>
   <link name="camera_link"/>
   <link name="camera_depth_frame"/>
   <link name="camera_depth_optical_frame"/>
@@ -190,13 +190,13 @@
   <link name="camera_left_ir_optical_frame"/>
   <link name="camera_right_ir_frame"/>
   <link name="camera_right_ir_optical_frame"/>
-  <!-- <joint name="camera_joint" type="fixed">
-    <parent link="base_link" />
-    <child link="camera_bottom_screw_frame" />
-    <pose xyz="0.4 0 0.25" rpy="0 0 0" />
-  </joint> -->
-  <joint name="camera_link_joint" type="fixed">
+  <joint name="camera_joint" type="fixed">
     <parent link="base_link"/>
+    <child link="camera_bottom_screw_frame"/>
+    <pose rpy="0 0 0" xyz="0.4 0 0.25"/>
+  </joint>
+  <joint name="camera_link_joint" type="fixed">
+    <parent link="camera_bottom_screw_frame"/>
     <child link="camera_link"/>
     <pose rpy="0 0 0" xyz="0 0.0175 0.0125 "/>
   </joint>

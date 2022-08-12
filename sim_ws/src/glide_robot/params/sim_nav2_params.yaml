@@ -6,7 +6,7 @@ amcl:
     alpha3: 0.002
     alpha4: 0.002
     alpha5: 0.002
-    base_frame_id: "base_footprint"
+    base_frame_id: "base_link"
     beam_skip_distance: 0.5
     beam_skip_error_threshold: 0.9
     beam_skip_threshold: 0.3
@@ -113,7 +113,7 @@ controller_server:
       footprint_model.radius: 0.3
       min_obstacle_dist: 0.5
       inflation_dist: 0.2
-      costmap_converter_plugin: costmap_converter::CostmapToPolygonsDBSMCCH
+      costmap_converter_plugin: costmap_converter::CostmapToLinesDBSMCCH
       costmap_converter_spin_thread: True
       costmap_converter_rate: 15.0
       enable_homotopy_class_planning: True
