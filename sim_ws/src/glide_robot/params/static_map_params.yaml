@@ -12,7 +12,7 @@ amcl:
     beam_skip_threshold: 0.3
     do_beamskip: false
     global_frame_id: "map"
-    initial_pose: [0.0, 0.0, 0.0, 0.0]
+    # initial_pose: [0.0, 0.0, 0.0, 0.0]
     lambda_short: 0.1
     laser_likelihood_max_dist: 2.0
     laser_max_range: 100.0
@@ -29,10 +29,10 @@ amcl:
     resample_interval: 1
     robot_model_type: "differential"
     save_pose_rate: 0.5
-    set_initial_pose: True
+    # set_initial_pose: True
     sigma_hit: 0.2
     tf_broadcast: true
-    transform_tolerance: 2.0
+    transform_tolerance: 4.0
     update_min_a: 0.2
     update_min_d: 0.25
     z_hit: 0.5
@@ -53,7 +53,7 @@ bt_navigator:
   ros__parameters:
     use_sim_time: False
     global_frame: map
-    robot_base_frame: base_link
+    robot_base_frame: base_footprint
     odom_topic: /odom
     enable_groot_monitoring: True
     groot_zmq_publisher_port: 1666
@@ -146,11 +146,11 @@ controller_server:
       footprint_model.type: two_circles
       footprint_model.front_offset: 0.0
       footprint_model.front_radius: 0.2
-      footprint_model.rear_offset: -1.0
+      footprint_model.rear_offset: 1.0
       footprint_model.rear_radius: 0.3
-      min_obstacle_dist: 0.2
-      inflation_dist: 0.2
-      costmap_converter_plugin: costmap_converter::CostmapToPolygonsDBSMCCH
+      min_obstacle_dist: 0.4
+      inflation_dist: 0.4
+      costmap_converter_plugin: costmap_converter::CostmapToLinesDBSMCCH
       costmap_converter_spin_thread: True
       costmap_converter_rate: 15.0
       enable_homotopy_class_planning: True
@@ -189,7 +189,7 @@ controller_server:
       # max_allowed_time_to_collision: 2.0
       # use_regulated_linear_velocity_scaling: true
       # use_cost_regulated_linear_velocity_scaling: false
-      # regulated_linear_scaling_min_radius: 0.4
+      # regulated_linear_scaling_min_radius: 0.9
       # regulated_linear_scaling_min_speed: 0.25
       # use_rotate_to_heading: false
       # use_interpolation: true
@@ -211,7 +211,7 @@ local_costmap:
       update_frequency: 10.0 
       publish_frequency: 2.0
       global_frame: odom
-      robot_base_frame: base_link
+      robot_base_frame: base_footprint
       use_sim_time: False
       rolling_window: true
       width: 10
@@ -224,14 +224,14 @@ local_costmap:
         cost_scaling_factor: 3.0
         inflation_radius: 0.3
       voxel_layer:
-        plugin: "nav2_costmap_2d::ObstacleLayer"
+        plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
-        # publish_voxel_map: True
-        # origin_z: 0.0
-        # z_resolution: 0.05
-        # z_voxels: 16
+        publish_voxel_map: True
+        origin_z: 0.0
+        z_resolution: 0.05
+        z_voxels: 16
         max_obstacle_height: 2.0
-        # mark_threshold: 0
+        mark_threshold: 0
         observation_sources: scan
         scan:
           topic: /scan
@@ -253,9 +253,9 @@ global_costmap:
   global_costmap:
     ros__parameters:
       update_frequency: 10.0
-      publish_frequency: 1.0
+      publish_frequency: 2.0
       global_frame: map
-      robot_base_frame: base_link
+      robot_base_frame: base_footprint
       use_sim_time: False
       robot_radius: 0.25
       resolution: 0.05
@@ -289,7 +289,7 @@ global_costmap:
 map_server:
   ros__parameters:
     use_sim_time: False
-    yaml_filename: "/home/vinitha/Glide/sim_ws/src/glide_robot/maps/map.yaml"
+    yaml_filename: "/home/vinitha/Glide/sim_ws/src/glide_robot/maps/99_hallway_remount.yaml"
 
 map_saver:
   ros__parameters:
@@ -354,7 +354,7 @@ recoveries_server:
     wait:
       plugin: "nav2_recoveries/Wait"
     global_frame: odom
-    robot_base_frame: base_link
+    robot_base_frame: base_footprint
     transform_timeout: 0.1
     use_sim_time: False
     simulate_ahead_time: 1.0
@@ -380,9 +380,9 @@ slam_toolbox:
     # ROS Parameters
     odom_frame: odom
     map_frame: map
-    base_frame: base_link
+    base_frame: base_footprint
     scan_topic: /scan
-    mode: localization
+    mode: mapping #localization
 
     # if you'd like to immediately start continuing a map at a given pose
     # or at the dock, but they are mutually exclusive, if pose is given
