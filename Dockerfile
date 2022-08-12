@@ -22,6 +22,8 @@ RUN apt-get update && \
         ros-$ROS_DISTRO-joint-state-publisher-gui \
         ros-$ROS_DISTRO-xacro
 
+RUN pip install serial
+
 ENV WORKSPACE_ROOT=/ws
 RUN echo 'source /opt/ros/foxy/setup.bash' >> /root/.bashrc && \
     echo 'source /ws/src/install/local_setup.bash' >> /root/.bashrc
