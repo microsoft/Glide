@@ -12,7 +12,8 @@ amcl:
     beam_skip_threshold: 0.3
     do_beamskip: false
     global_frame_id: "map"
-    initial_pose: [0.0, 0.0, 0.0, 0.0]
+    # initial_pose: [0.0, 0.0, 0.0, -1.0]
+    initial_pose.yaw: -0.1667
     lambda_short: 0.1
     laser_likelihood_max_dist: 2.0
     laser_max_range: 100.0
@@ -32,7 +33,7 @@ amcl:
     set_initial_pose: True
     sigma_hit: 0.2
     tf_broadcast: true
-    transform_tolerance: 1.0
+    transform_tolerance: 5.0
     update_min_a: 0.2
     update_min_d: 0.25
     z_hit: 0.5
@@ -108,57 +109,62 @@ controller_server:
       yaw_goal_tolerance: 3.14
       stateful: True
     FollowPath:
-      plugin: "teb_local_planner::TebLocalPlannerROS"
-      footprint_model.type: circular
-      footprint_model.radius: 0.3
-      min_obstacle_dist: 0.5
-      inflation_dist: 0.2
-      costmap_converter_plugin: costmap_converter::CostmapToLinesDBSMCCH
-      costmap_converter_spin_thread: True
-      costmap_converter_rate: 15.0
-      enable_homotopy_class_planning: True
-      enable_multithreading: True
-      #weight_obstacle: 100.0
-      optimization_verbose: False
-      teb_autoresize: True
-      min_samples: 3
-      max_samples: 100
-      max_global_plan_lookahead_dist: 1.0
-      visualize_hc_graph: True
-      max_vel_x: 0.26
-      max_vel_theta: 1.25
-      max_vel_backwards: 0.0
-      acc_lim_x: 2.5
-      acc_lim_theta: 1.25
-      min_turning_radius: 1.0       # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
-      wheelbase: 0.145                 # Wheelbase of our robot
-      cmd_angle_instead_rotvel: True # stage simulator takes the angle instead of the rotvel as input (twist message)
+      # plugin: "teb_local_planner::TebLocalPlannerROS"
+      # footprint_model.type: two_circles
+      # footprint_model.front_offset: 0.0
+      # footprint_model.front_radius: 0.3
+      # footprint_model.rear_offset: 1.0
+      # footprint_model.rear_radius: 0.3
+      # min_obstacle_dist: 0.4
+      # inflation_dist: 0.4
+      # costmap_converter_plugin: costmap_converter::CostmapToPolygonsDBSMCCH
+      # costmap_converter_spin_thread: True
+      # costmap_converter_rate: 15.0
+      # enable_homotopy_class_planning: True
+      # enable_multithreading: True
+      # #weight_obstacle: 100.0
+      # optimization_verbose: False
+      # weight_kinematics_turning_radius: 2.0
+      # teb_autoresize: True
+      # min_samples: 3
+      # max_samples: 200
+      # max_global_plan_lookahead_dist: 1.0
+      # visualize_hc_graph: True
+      # max_vel_x: 0.26
+      # max_vel_theta: 0.9
+      # max_vel_backwards: 0.0
+      # acc_lim_x: 2.5
+      # acc_lim_theta: 1.57
+      # min_turning_radius: 0.4       # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
+      # wheelbase: 0.145                 # Wheelbase of our robot
+      # cmd_angle_instead_rotvel: false # stage simulator takes the angle instead of the rotvel as input (twist message)
+      # global_plan_overwrite_orientation: True
 
-      # plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
-      # desired_linear_vel: 0.5
-      # max_linear_accel: 2.5
-      # max_linear_decel: 2.5
-      # lookahead_dist: 0.6
-      # min_lookahead_dist: 0.3
-      # max_lookahead_dist: 0.9
-      # lookahead_time: 1.5
-      # rotate_to_heading_angular_vel: 1.8
-      # transform_tolerance: 0.1
-      # use_velocity_scaled_lookahead_dist: false
-      # min_approach_linear_velocity: 0.05
-      # use_approach_linear_velocity_scaling: true
-      # max_allowed_time_to_collision: 1.0
-      # use_regulated_linear_velocity_scaling: true
-      # use_cost_regulated_linear_velocity_scaling: false
-      # regulated_linear_scaling_min_radius: 0.9
-      # regulated_linear_scaling_min_speed: 0.25
-      # use_rotate_to_heading: true
-      # rotate_to_heading_min_angle: 0.785
-      # max_angular_accel: 3.2
-      # goal_dist_tol: 0.25
-      # cost_scaling_dist: 0.3
-      # cost_scaling_gain: 1.0
-      # inflation_cost_scaling_factor: 3.0
+      plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
+      desired_linear_vel: 0.5
+      max_linear_accel: 2.5
+      max_linear_decel: 2.5
+      lookahead_dist: 0.6
+      min_lookahead_dist: 0.3
+      max_lookahead_dist: 0.9
+      lookahead_time: 1.5
+      rotate_to_heading_angular_vel: 1.8
+      transform_tolerance: 0.1
+      use_velocity_scaled_lookahead_dist: false
+      min_approach_linear_velocity: 0.05
+      use_approach_linear_velocity_scaling: true
+      max_allowed_time_to_collision: 1.0
+      use_regulated_linear_velocity_scaling: true
+      use_cost_regulated_linear_velocity_scaling: false
+      regulated_linear_scaling_min_radius: 0.9
+      regulated_linear_scaling_min_speed: 0.25
+      use_rotate_to_heading: true
+      rotate_to_heading_min_angle: 0.785
+      max_angular_accel: 3.2
+      goal_dist_tol: 0.25
+      cost_scaling_dist: 0.3
+      cost_scaling_gain: 1.0
+      inflation_cost_scaling_factor: 3.0
 
 controller_server_rclcpp_node:
   ros__parameters:
@@ -176,7 +182,7 @@ local_costmap:
       width: 10
       height: 10
       resolution: 0.05
-      robot_radius: 0.75
+      robot_radius: 0.3
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
