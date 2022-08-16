@@ -51,7 +51,7 @@
 
     <include>
       <!-- Set the location where we want to spawn the robot -->
-      <pose>0 0 0.0 0.0 0.0 -0.1</pose>
+      <pose>0 0 0.0 0.0 0.0 0</pose>
       <!-- basic_mobile_robot -->
       <uri>model://sim_glide_description</uri>
     </include>

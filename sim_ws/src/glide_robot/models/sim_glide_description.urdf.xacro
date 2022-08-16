@@ -83,8 +83,8 @@
     </gazebo>
 
     <joint name="front_${name}_wheel_joint" type="revolute">
-      <limit lower="-0.6" upper="0.6" effort="100" velocity="1"/>
-      <origin rpy="${degrees_90} 0 ${pi}" xyz="${offset + wheel_offset} ${xy_reflect * (wheel_gap + body_width/2)} ${wheel_radius + 0.03}"/>
+      <limit lower="-0.9" upper="0.9" effort="100" velocity="1"/>
+      <origin rpy="${degrees_90} 0 ${pi}" xyz="${offset + wheel_offset} ${xy_reflect * (wheel_gap + body_width/2)} ${wheel_radius}"/>
       <parent link="base_link"/>
       <child link="front_${name}_wheel"/>
       <axis xyz="0 1 0"/>
@@ -116,7 +116,7 @@
       </inertial> 
     </link>
     <joint name="rear_${name}_wheel_joint" type="continuous">
-      <origin rpy="${degrees_90} 0 ${pi}" xyz="0 0 0"/>
+      <origin rpy="${degrees_90} 0 ${pi}" xyz="-0.5 ${xy_reflect * (wheel_gap + body_width/2)} ${wheel_radius}"/>
       <parent link="base_link"/>
       <child link="rear_${name}_wheel"/>
       <axis xyz="0 0 1"/>
@@ -271,7 +271,7 @@
     </visual>
   </link>
   <joint name="base_to_human" type="fixed">
-    <origin rpy="0 ${degrees_90} 0" xyz="-1.0 0.0 ${2*wheel_radius}"/>
+    <origin rpy="0 ${degrees_90} 0" xyz="-0.5 0.0 ${2*body_center}"/>
     <parent link="base_link"/>
     <child link="human_link"/>
   </joint>

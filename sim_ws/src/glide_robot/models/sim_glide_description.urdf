@@ -73,8 +73,8 @@
     <material>Gazebo/White</material>
   </gazebo>
   <joint name="front_right_wheel_joint" type="revolute">
-    <limit effort="100" lower="-0.6" upper="0.6" velocity="1"/>
-    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="-0.061900000000000004 -0.13175 0.107"/>
+    <limit effort="100" lower="-0.9" upper="0.9" velocity="1"/>
+    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="-0.061900000000000004 -0.13175 0.077"/>
     <parent link="base_link"/>
     <child link="front_right_wheel"/>
     <axis xyz="0 1 0"/>
@@ -106,8 +106,8 @@
     <material>Gazebo/White</material>
   </gazebo>
   <joint name="front_left_wheel_joint" type="revolute">
-    <limit effort="100" lower="-0.6" upper="0.6" velocity="1"/>
-    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="-0.061900000000000004 0.13175 0.107"/>
+    <limit effort="100" lower="-0.9" upper="0.9" velocity="1"/>
+    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="-0.061900000000000004 0.13175 0.077"/>
     <parent link="base_link"/>
     <child link="front_left_wheel"/>
     <axis xyz="0 1 0"/>
@@ -136,7 +136,7 @@
     </inertial>
   </link>
   <joint name="rear_right_wheel_joint" type="continuous">
-    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="0 0 0"/>
+    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="-0.5 -0.13175 0.077"/>
     <parent link="base_link"/>
     <child link="rear_right_wheel"/>
     <axis xyz="0 0 1"/>
@@ -164,7 +164,7 @@
     </inertial>
   </link>
   <joint name="rear_left_wheel_joint" type="continuous">
-    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="0 0 0"/>
+    <origin rpy="1.5707963267948966 0 3.141592653589793" xyz="-0.5 0.13175 0.077"/>
     <parent link="base_link"/>
     <child link="rear_left_wheel"/>
     <axis xyz="0 0 1"/>
@@ -249,7 +249,7 @@
     </visual>
   </link>
   <joint name="base_to_human" type="fixed">
-    <origin rpy="0 1.5707963267948966 0" xyz="-1.0 0.0 0.154"/>
+    <origin rpy="0 1.5707963267948966 0" xyz="-0.5 0.0 0.2"/>
     <parent link="base_link"/>
     <child link="human_link"/>
   </joint>

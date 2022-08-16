@@ -14,3 +14,7 @@
 	path = sim_ws/src/costmap_converter
 	url = https://github.com/rst-tu-dortmund/costmap_converter
 	branch = ros2
+[submodule "sim_ws/src/ros2_message_converter"]
+	path = sim_ws/src/ros2_message_converter
+	url = https://github.com/mehmetkillioglu/ros2_message_converter.git
+	branch = foxy

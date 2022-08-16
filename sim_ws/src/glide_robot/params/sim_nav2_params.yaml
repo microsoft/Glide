@@ -13,7 +13,7 @@ amcl:
     do_beamskip: false
     global_frame_id: "map"
     # initial_pose: [0.0, 0.0, 0.0, -1.0]
-    initial_pose.yaw: -0.1667
+    # initial_pose.yaw: -0.1667
     lambda_short: 0.1
     laser_likelihood_max_dist: 2.0
     laser_max_range: 100.0
@@ -113,10 +113,10 @@ controller_server:
       # footprint_model.type: two_circles
       # footprint_model.front_offset: 0.0
       # footprint_model.front_radius: 0.3
-      # footprint_model.rear_offset: 1.0
+      # footprint_model.rear_offset: -0.5
       # footprint_model.rear_radius: 0.3
-      # min_obstacle_dist: 0.4
-      # inflation_dist: 0.4
+      # min_obstacle_dist: 0.3
+      # inflation_dist: 0.3
       # costmap_converter_plugin: costmap_converter::CostmapToPolygonsDBSMCCH
       # costmap_converter_spin_thread: True
       # costmap_converter_rate: 15.0
@@ -135,13 +135,13 @@ controller_server:
       # max_vel_backwards: 0.0
       # acc_lim_x: 2.5
       # acc_lim_theta: 1.57
-      # min_turning_radius: 0.4       # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
+      # min_turning_radius: 0.2       # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
       # wheelbase: 0.145                 # Wheelbase of our robot
       # cmd_angle_instead_rotvel: false # stage simulator takes the angle instead of the rotvel as input (twist message)
       # global_plan_overwrite_orientation: True
 
       plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
-      desired_linear_vel: 0.5
+      desired_linear_vel: 1.0
       max_linear_accel: 2.5
       max_linear_decel: 2.5
       lookahead_dist: 0.6
@@ -156,12 +156,12 @@ controller_server:
       max_allowed_time_to_collision: 1.0
       use_regulated_linear_velocity_scaling: true
       use_cost_regulated_linear_velocity_scaling: false
-      regulated_linear_scaling_min_radius: 0.9
+      regulated_linear_scaling_min_radius: 0.4
       regulated_linear_scaling_min_speed: 0.25
       use_rotate_to_heading: true
       rotate_to_heading_min_angle: 0.785
       max_angular_accel: 3.2
-      goal_dist_tol: 0.25
+      goal_dist_tol: 0.15
       cost_scaling_dist: 0.3
       cost_scaling_gain: 1.0
       inflation_cost_scaling_factor: 3.0
