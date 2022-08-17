@@ -13,7 +13,7 @@
       </collision>
 
       <visual name="visual">
-        <pose>-6.85 5.25 2.5 0 0 0</pose>
+        <pose>-6.7 5.25 2.0 0 0 0</pose>
         <geometry>
           <mesh>
             <uri>model://99-hallway/meshes/99-hallway.dae</uri>
