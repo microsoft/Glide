@@ -30,7 +30,7 @@ rcl_publisher_t publisher_torque;
 rcl_publisher_t publisher_odometry_left;
 rcl_publisher_t publisher_odometry_right;
 rcl_subscription_t subscriber_haptic;
-rcl_subscription_t cmd_vel_sub;
+rcl_subscription_t subscriber_cmdvel;
 std_msgs__msg__Int32 msg_timer;
 std_msgs__msg__Int32 msg_torque;
 std_msgs__msg__Int32 msg_odometry_left;
@@ -104,17 +104,17 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
   }
 }
 
-//void cmd_vel_callback(const void * msgin)
-//{
-//  geometry_msgs__msg__Twist * msg = (geometry_msgs__msg__Twist *) msgin;
-//  // TODO actuate haptic break gesture  
-//}
+void cmd_vel_callback(const void * msgin)
+{
+  geometry_msgs__msg__Twist * msg = (geometry_msgs__msg__Twist *) msgin;
+  // TODO actuate haptic break gesture  
+}
 
-//void haptic_callback(const void * msgin)
-//{
-//  std_msgs__msg__Int32 * msg = (std_msgs__msg__Int32 *) msgin;
-//  // TODO actuate haptic gesture  
-//}
+void haptic_callback(const void * msgin)
+{
+  std_msgs__msg__Int32 * msg = (std_msgs__msg__Int32 *) msgin;
+  // TODO actuate haptic gesture  
+}
 
 // Functions create_entities and destroy_entities can take several seconds.
 // In order to reduce this rebuild the library with
@@ -126,10 +126,14 @@ bool create_entities()
   allocator = rcl_get_default_allocator();
 
   // create init_options
-  RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
+  int argc = 0;
+  char ** argv = NULL;
+  RCCHECK(rclc_support_init(&support, argc, argv, &allocator));
 
   // create node
-  RCCHECK(rclc_node_init_default(&node, "microROS_node", "", &support));
+  const char * node_name = "microROS_node";
+  const char * node_namespace = ""; // Node namespace (Can remain empty "")
+  RCCHECK(rclc_node_init_default(&node, node_name, node_namespace, &support));
 
   // create publisher_timer
   RCCHECK(rclc_publisher_init_default(
@@ -168,34 +172,47 @@ bool create_entities()
   ));
 
   RCCHECK(rclc_subscription_init_best_effort(
-    &cmd_vel_sub,
+    &subscriber_cmdvel,
     &node,
     ROSIDL_GET_MSG_TYPE_SUPPORT(geometry_msgs, msg, Twist),
     "cmd_vel"));
 
   // create executor
+  // NOTE: If adding a timer or subscription, you MUST update num_timers and/or num_subscriptions!
+  const int num_timers = 1;
+  const int num_subscriptions = 2;
+  const int num_handles = num_timers + num_subscriptions;
+
   executor = rclc_executor_get_zero_initialized_executor();
-  RCCHECK(rclc_executor_init(&executor, &support.context, 1, &allocator));
-  RCCHECK(rclc_executor_add_timer(&executor, &timer));
-    // create timer,
+  RCCHECK(rclc_executor_init(
+    &executor,
+    &support.context,
+    num_handles, 
+    &allocator));
+  
+  RCCHECK(rclc_executor_add_timer(
+    &executor,
+    &timer));
+  RCCHECK(rclc_executor_add_subscription(
+    &executor, 
+    &subscriber_haptic, 
+    &msg_haptic, 
+    haptic_callback, 
+    ON_NEW_DATA));
+  RCCHECK(rclc_executor_add_subscription(
+    &executor, 
+    &cmd_vel_sub, 
+    &cmd_vel, 
+    cmd_vel_callback, 
+    ON_NEW_DATA));
+  
+  // create timer,
   const unsigned int timer_timeout = 1000;
   RCCHECK(rclc_timer_init_default(
     &timer,
     &support,
     RCL_MS_TO_NS(timer_timeout),
     timer_callback));
-//  RCCHECK(rclc_executor_add_subscription(
-//    &executor, 
-//    &subscriber_haptic, 
-//    &msg_haptic, 
-//    haptic_callback, 
-//    ON_NEW_DATA));
-//  RCCHECK(rclc_executor_add_subscription(
-//    &executor, 
-//    &cmd_vel_sub, 
-//    &cmd_vel, 
-//    cmd_vel_callback, 
-//    ON_NEW_DATA));
 
   return true;
 }
@@ -210,7 +227,7 @@ void destroy_entities()
   rcl_publisher_fini(&publisher_odometry_left, &node);
   rcl_publisher_fini(&publisher_odometry_right, &node);
   rcl_subscription_fini(&subscriber_haptic, &node);
-  rcl_subscription_fini(&cmd_vel_sub, &node);
+  rcl_subscription_fini(&subscriber_cmdvel, &node);
 
   rcl_timer_fini(&timer);
   rclc_executor_fini(&executor);
