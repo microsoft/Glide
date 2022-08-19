@@ -8,7 +8,7 @@
 #include <rmw_microros/rmw_microros.h>
 
 #include <std_msgs/msg/int32.h>
-//#include <geometry_msgs/msg/twist.h>
+#include <geometry_msgs/msg/twist.h>
 
 #include "HX711.h" // Rob Tillaart library
 
@@ -35,8 +35,8 @@ std_msgs__msg__Int32 msg_timer;
 std_msgs__msg__Int32 msg_torque;
 std_msgs__msg__Int32 msg_odometry_left;
 std_msgs__msg__Int32 msg_odometry_right;
-//std_msgs__msg__Int32 msg_haptic;
-//geometry_msgs__msg__Twist cmd_vel;
+std_msgs__msg__Int32 msg_haptic;
+geometry_msgs__msg__Twist cmd_vel;
 bool micro_ros_init_successful;
 
 #pragma region wheel encoder variables
@@ -209,7 +209,7 @@ void destroy_entities()
   rcl_publisher_fini(&publisher_torque, &node);
   rcl_publisher_fini(&publisher_odometry_left, &node);
   rcl_publisher_fini(&publisher_odometry_right, &node);
-  //rcl_subscription_fini(&subscriber_haptic, &node);
+  rcl_subscription_fini(&subscriber_haptic, &node);
   rcl_subscription_fini(&cmd_vel_sub, &node);
 
   rcl_timer_fini(&timer);
