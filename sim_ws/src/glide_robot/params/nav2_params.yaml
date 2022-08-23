@@ -104,7 +104,7 @@ controller_server:
       movement_time_allowance: 10.0
     goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.25
+      xy_goal_tolerance: 0.4
       yaw_goal_tolerance: 3.14
       stateful: True
     FollowPath:
@@ -143,14 +143,15 @@ controller_server:
       # GoalDist.scale: 24.0
 
       plugin: "teb_local_planner::TebLocalPlannerROS"
+      map_frame: "/map"
       footprint_model.type: two_circles
       footprint_model.front_offset: 0.0
       footprint_model.front_radius: 0.2
-      footprint_model.rear_offset: -1.0
+      footprint_model.rear_offset: 0.5
       footprint_model.rear_radius: 0.3
       min_obstacle_dist: 0.2
       inflation_dist: 0.2
-      costmap_converter_plugin: costmap_converter::CostmapToPolygonsDBSMCCH
+      costmap_converter_plugin: costmap_converter::CostmapToLinesDBSRANSAC
       costmap_converter_spin_thread: True
       costmap_converter_rate: 15.0
       enable_homotopy_class_planning: True
@@ -168,11 +169,13 @@ controller_server:
       max_vel_backwards: 0.0
       acc_lim_x: 2.5
       acc_lim_theta: 1.57
-      min_turning_radius: 0.4       # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
+      min_turning_radius: 0.0       # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
       wheelbase: 0.145                 # Wheelbase of our robot
       cmd_angle_instead_rotvel: false # stage simulator takes the angle instead of the rotvel as input (twist message)
       global_plan_overwrite_orientation: True
-
+      yaw_goal_tolerance: 3.14
+      xy_goal_tolerance: 0.4
+      
       # plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
       # desired_linear_vel: 0.5
       # max_linear_accel: 2.5
