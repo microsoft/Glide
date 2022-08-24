@@ -20,6 +20,18 @@ class GlobalPlanPublisher(Node):
     def publish(self, msg):
         self.publisher.publish(msg)
 
+def execute_plan(navigator, plan):
+    navigator.goThroughPoses(plan)
+    feedback = navigator.getFeedback()
+    i = 0
+    while not navigator.isNavComplete():
+        feedback = navigator.getFeedback()
+        if feedback and i % 5 == 0:
+            print('Distance remaining: ' + '{:.2f}'.format(
+                feedback.distance_to_goal) + ' meters.')
+        i += 1
+    return feedback
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--traj_file', help="Name of the file in the trajectories subdirectory")
@@ -35,26 +47,30 @@ if __name__ == '__main__':
 
     node = rclpy.create_node('path_pub')
     publisher = node.create_publisher(Path, 'plan', 10)
-    while rclpy.ok():
-        publisher.publish(ros_msg)
-        sleep(0.5)
-        break
+    publisher.publish(ros_msg)
+    rclpy.spin_once(publisher, timeout_sec=1.0)
 
     navigator = BasicNavigator()
     navigator.waitUntilNav2Active()
     navigator.clearLocalCostmap()
-    navigator.goThroughPoses(ros_msg)
+    max_retries = 3
+    num_retries = 0
+    retry = True
 
-    i = 0
-    while not navigator.isNavComplete():
-        i += 1
-
-    result = navigator.getResult()
-    if result == NavigationResult.SUCCEEDED:
-        print('Goal succeeded!')
-    elif result == NavigationResult.CANCELED:
-        print('Goal was canceled!')
-    elif result == NavigationResult.FAILED:
-        print('Goal failed!')
-    else:
-        print('Goal has an invalid return status!')
+    while retry == True and num_retries < max_retries:
+        feedback = execute_plan(navigator, ros_msg)
+        result = navigator.getResult()
+        if result == NavigationResult.SUCCEEDED:
+            print('Goal succeeded!')
+            retry = False
+        elif result == NavigationResult.CANCELED:
+            print('Goal was canceled!')
+            retry = False
+        elif result == NavigationResult.FAILED:
+            print('Goal failed!')
+            if feedback.distance_to_goal > 0.5 and num_retries < max_retries:
+                retry = True
+                num_retries += 1
+                print('Retrying...')
+        else:
+            print('Goal has an invalid return status!')
