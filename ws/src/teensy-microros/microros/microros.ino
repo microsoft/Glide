@@ -107,7 +107,7 @@ void set_haptic_gesture(hapticGestures new_gesture)
     case ALL_ON:
         for (actuator_idx = 0; actuator_idx < ACTUATOR_COUNT ; actuator_idx++)
         {
-          digitalWrite(Actuator[actuator_idx], LOW); //turn off
+          digitalWrite(Actuator[actuator_idx], HIGH); //turn on
         }
         break;
     case LEFT_TURN:
