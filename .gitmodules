@@ -1,3 +1,20 @@
 [submodule "sim_ws/realsense_gazebo_plugin"]
 	path = sim_ws/src/realsense_gazebo_plugin
 	url = https://github.com/pal-robotics/realsense_gazebo_plugin.git
+	branch = foxy-devel
+[submodule "sim_ws/src/depthimage_to_laserscan"]
+	path = sim_ws/src/depthimage_to_laserscan
+	url = https://github.com/ros-perception/depthimage_to_laserscan.git
+	branch = foxy-devel
+[submodule "sim_ws/src/teb_local_planner"]
+	path = sim_ws/src/teb_local_planner
+	url = https://github.com/rst-tu-dortmund/teb_local_planner.git
+	branch = foxy-devel
+[submodule "sim_ws/src/costmap_converter"]
+	path = sim_ws/src/costmap_converter
+	url = https://github.com/rst-tu-dortmund/costmap_converter
+	branch = ros2
+[submodule "sim_ws/src/ros2_message_converter"]
+	path = sim_ws/src/ros2_message_converter
+	url = https://github.com/mehmetkillioglu/ros2_message_converter.git
+	branch = foxy

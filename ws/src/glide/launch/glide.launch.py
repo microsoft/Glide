@@ -26,8 +26,8 @@ def generate_launch_description():
     realsense2_camera_dir = get_package_share_directory('realsense2_camera')
     realsense2_camera = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([realsense2_camera_dir, '/launch/rs_launch.py']),
-            launch_arguments={'align_depth':'true', 'depth_width':'640', 'depth_height': '360', 'depth_fps':'15.0',
-                'color_width':'640', 'color_height':'360','color_fps':'15.0', 'enable_gyro':'true', 'enable_accel':'true', 'unite_imu_method':'linear_interpolation'}.items()
+            launch_arguments={'align_depth': 'true', 'depth_width':'640', 'depth_height': '360', 'depth_fps':'15.0',
+                'color_width':'640', 'color_height':'360','color_fps':'15.0', 'enable_gyro':'true', 'enable_accel':'true', 'unite_imu_method':'copy'}.items()
         )
 
     # ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyACM0
@@ -44,6 +44,14 @@ def generate_launch_description():
         package='cmdvel_to_servo',
         executable='cmdvel_to_servo_node',
         name='cmdvel_to_servo',
+        output='screen',
+    )
+
+    # ros2 run torque_to_haptics torque_to_haptics_node
+    torque_to_haptics = Node(
+        package='torque_to_haptics',
+        executable='torque_to_haptics_node',
+        name='torque_to_haptics',
         output='screen',
     )
 
@@ -78,6 +86,7 @@ def generate_launch_description():
           ('depth/image', '/camera/aligned_depth_to_color/image_raw')]
 
     rgbd_odometry = Node(
+
         package='rtabmap_ros', executable='rgbd_odometry', output='screen',
         parameters=parameters,
         remappings=remappings
@@ -162,25 +171,20 @@ def generate_launch_description():
         arguments=["-1.0", "-0.13175", "0.107", "0", "0", "1.57", "base_link", "rear_right_wheel"]
     )
 
-    base_to_odom = Node(
-        package="tf2_ros",
-        executable="static_transform_publisher",
-        arguments=["0", "0", "0", "0", "0", "0", "odom", "base_footprint"]
-    )
-
     return LaunchDescription([
         ros_qwiic_servo,
         micro_ros_agent,
         cmdvel_to_servo,
+        torque_to_haptics,
         realsense2_camera,
         depth_to_laser_scan,
         rgbd_odometry,
-        # rtabmap,
+        #rtabmap,
         imu_filter,
         robot_state_publisher,
         base_to_realsense,
         base_to_front_left_wheel,
         base_to_front_right_wheel,
         base_to_rear_left_wheel,
-        base_to_rear_right_wheel,
+        base_to_rear_right_wheel
     ])
