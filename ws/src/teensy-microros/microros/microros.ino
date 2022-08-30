@@ -31,12 +31,16 @@ rcl_publisher_t publisher_torque;
 rcl_publisher_t publisher_odometry_left;
 rcl_publisher_t publisher_odometry_right;
 rcl_subscription_t subscriber_haptic;
+rcl_subscription_t subscriber_haptic_amplitude;
+rcl_subscription_t subscriber_haptic_duration;
 rcl_subscription_t subscriber_cmdvel;
 std_msgs__msg__Int32 msg_timer;
 std_msgs__msg__Int32 msg_torque;
 std_msgs__msg__Int32 msg_odometry_left;
 std_msgs__msg__Int32 msg_odometry_right;
 std_msgs__msg__Int32 msg_haptic;
+std_msgs__msg__Int32 msg_haptic_amplitude;
+std_msgs__msg__Int32 msg_haptic_duration;
 geometry_msgs__msg__Twist cmd_vel;
 bool micro_ros_init_successful;
 
@@ -66,7 +70,6 @@ float TorqueFlt = 0; //handle torque avg filtered value to reduce drift
 #pragma endregion
 
 #pragma region Haptic Actuator globals
-const int GESTURE_DIRATION = 50;
 const int ACTUATOR_COUNT = 6;
 int Actuator[6] = {9, 10, 11, 12, 24, 25}; //Glide handle actuators
 
@@ -79,6 +82,8 @@ enum hapticGestures {
 
 hapticGestures currentGesture = ALL_OFF;
 unsigned long currentGestureEnd = 0;
+unsigned short int haptic_amplitude = 127;
+unsigned int haptic_duration = 50;
 #pragma endregion
 
 #define DEBUG_DIAGNOSTIC_PIN 0
@@ -93,7 +98,7 @@ enum states {
 void set_haptic_gesture(hapticGestures new_gesture)
 {
   currentGesture = new_gesture;
-  currentGestureEnd = rmw_uros_epoch_millis() + GESTURE_DIRATION;
+  currentGestureEnd = rmw_uros_epoch_millis() + haptic_duration;
 
   int actuator_idx;
   switch(currentGesture)
@@ -101,25 +106,25 @@ void set_haptic_gesture(hapticGestures new_gesture)
     case ALL_OFF:
         for (actuator_idx = 0; actuator_idx < ACTUATOR_COUNT ; actuator_idx++)
         {
-          digitalWrite(Actuator[actuator_idx], LOW); //turn off
+          analogWrite (Actuator[actuator_idx], 0);
         }
         break;
     case ALL_ON:
         for (actuator_idx = 0; actuator_idx < ACTUATOR_COUNT ; actuator_idx++)
         {
-          digitalWrite(Actuator[actuator_idx], HIGH); //turn on
+          analogWrite (Actuator[actuator_idx], haptic_amplitude);
         }
         break;
     case LEFT_TURN:
         for (actuator_idx = 0; actuator_idx < ACTUATOR_COUNT/2 ; actuator_idx++)
         {
-          digitalWrite(Actuator[actuator_idx], HIGH);
+          analogWrite (Actuator[actuator_idx], haptic_amplitude);
         }
         break;
     case RIGHT_TURN:
         for (actuator_idx = ACTUATOR_COUNT/2; actuator_idx < ACTUATOR_COUNT ; actuator_idx++)
         {
-          digitalWrite(Actuator[actuator_idx], HIGH);
+          analogWrite (Actuator[actuator_idx], haptic_amplitude);
         }
         break;
     default:
@@ -157,6 +162,18 @@ void haptic_callback(const void * msgin)
   std_msgs__msg__Int32 * msg = (std_msgs__msg__Int32 *) msgin;
   hapticGestures new_gesture = (hapticGestures)msg->data;
   set_haptic_gesture(new_gesture);
+}
+
+void haptic_amplitude_callback(const void * msgin)
+{
+  std_msgs__msg__Int32 * msg = (std_msgs__msg__Int32 *) msgin;
+  haptic_amplitude = msg->data;
+}
+
+void haptic_duration_callback(const void * msgin)
+{
+  std_msgs__msg__Int32 * msg = (std_msgs__msg__Int32 *) msgin;
+  haptic_duration = msg->data;
 }
 
 // Functions create_entities and destroy_entities can take several seconds.
@@ -214,6 +231,20 @@ bool create_entities()
     "/microROS/haptic"
   ));
 
+  RCCHECK(rclc_subscription_init_default(
+    &subscriber_haptic_amplitude,
+    &node,
+    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
+    "/microROS/haptic_amplitude"
+  ));
+  
+  RCCHECK(rclc_subscription_init_default(
+    &subscriber_haptic_duration,
+    &node,
+    ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
+    "/microROS/haptic_duration"
+  ));
+ 
   RCCHECK(rclc_subscription_init_best_effort(
     &subscriber_cmdvel,
     &node,
@@ -223,7 +254,7 @@ bool create_entities()
   // create executor
   // NOTE: If adding a timer or subscription, you MUST update num_timers and/or num_subscriptions!
   const int num_timers = 1;
-  const int num_subscriptions = 2;
+  const int num_subscriptions = 4;
   const int num_handles = num_timers + num_subscriptions;
 
   executor = rclc_executor_get_zero_initialized_executor();
@@ -241,6 +272,18 @@ bool create_entities()
     &subscriber_haptic, 
     &msg_haptic, 
     haptic_callback, 
+    ON_NEW_DATA));
+  RCCHECK(rclc_executor_add_subscription(
+    &executor, 
+    &subscriber_haptic_amplitude, 
+    &msg_haptic_amplitude, 
+    haptic_amplitude_callback, 
+    ON_NEW_DATA));
+ RCCHECK(rclc_executor_add_subscription(
+    &executor, 
+    &subscriber_haptic_duration, 
+    &msg_haptic_duration, 
+    haptic_duration_callback, 
     ON_NEW_DATA));
   RCCHECK(rclc_executor_add_subscription(
     &executor, 
@@ -270,6 +313,8 @@ void destroy_entities()
   rcl_publisher_fini(&publisher_odometry_left, &node);
   rcl_publisher_fini(&publisher_odometry_right, &node);
   rcl_subscription_fini(&subscriber_haptic, &node);
+  rcl_subscription_fini(&subscriber_haptic_amplitude, &node);
+  rcl_subscription_fini(&subscriber_haptic_duration, &node);
   rcl_subscription_fini(&subscriber_cmdvel, &node);
 
   rcl_timer_fini(&timer);
@@ -293,11 +338,12 @@ void initialize_wheel_encoders()
 
 void initialize_haptic_actuators()
 {
+  const int PWM_FREQUENCY = 1000; // PWM freq = 1KHz
   // initialize the Haptic output digital pins as an outputs for haptic actuators.
   for (int actuator_idx = 0; actuator_idx < ACTUATOR_COUNT; actuator_idx++) //make all actuator pins output
   {
     pinMode(Actuator[actuator_idx], OUTPUT);
-    digitalWrite(Actuator[actuator_idx], LOW);
+    analogWriteFrequency (Actuator[actuator_idx], PWM_FREQUENCY); // actuator pins rather than the default 488 Hz PWM update without this statement
   }
 }
 

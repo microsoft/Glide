@@ -1,33 +1,45 @@
 
 /*
-    Teensy4.1 Glide program  "GlideHero5"
-    Added serial input via Teensy USB serial port. For ROS2 inputs. Presently just actuates handle haptics
+    Teensy4.1 Glide program  "GlideHero4"
     Should work on Jon's and Mike's V2 GLIDE
     - Read R/C servo wireless receiver 8 channels and read pulse length in microseconds
     - Uses interrupts on servo signal changes
     - Using RadioLink xmt/rcv  'B' pair
+
     - Pulse haptic actuators
+
     - Read torque sensor for user steering
     Uses
   - Teensy (www/pjrc.com) 4.1 micro processor
+
   - RadioLink TS8 8 chl remote control system
   https://www.amazon.com/gp/product/B07WR9Y1HG/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1
+
   - BS-270 FET switches to actuate 1 (or more) of 6 vibrotactile actuators in the handle
+
   - (6) Vibrotactile actuators
   https://www.amazon.com/gp/product/B0967SC28N/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1
+
   - 24 bit strain guage HX711 ADC to  3volt I2C PAM8403 to read torque sensor
   https://www.amazon.com/gp/product/B00LODGV64/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1
+
   - 20 Kg load cell (used as a torque sensor)
   https://www.amazon.com/gp/product/B096FKK8KS/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1
+
   - D940TW steering servo. 8.4v Digital, programable
+
   - (2) HS-5035HD nano (brake) servos digital, programmable. 5v
+
   - (2) Wheel encoder 600 PPRev
   https://www.amazon.com/gp/product/B085ZLCYS1/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1
+
   - 5000 maH 2S 7.4v LiPo battery
   https://www.amazon.com/gp/product/B07T7GZ5C2/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1
+
   - Read R/C servo wireless receiver 8 channels and read pulse length in microseconds
   - Uses interrupts on signal changes
   -   Using RadioLink xmt/rcv  'B' pair
+
 */
 
 //#include <Servo.h>                           // Include servo library
@@ -74,6 +86,7 @@ int InByte = 0; //serial input char from ROS2
 int SerInFlag = 0;  //Serial Input flag
 int LEDpin = 13;  //Teensy's onboard LED pin#
 int TeensyLED = 0; //value of LED status/
+int ActuatorAmplitude = 255;  //max haptic actuator amplitude
 
 // HX711 circuit wiring pin assment
 const int LOADCELL_DOUT_PIN = 17;
@@ -117,6 +130,9 @@ int Actuator[7] = {0, 9, 10, 11, 12, 24, 25}; //Glide handle actuators
 //****************************************************************
 void setup() {
 
+  //  analogWriteFrequency (30, 1000); //PWM freq = 1KHz actuator pins rather than the default 488 Hz PWM update without this statement
+  analogWriteResolution(8);      //PWM timing resolution = bit range
+  
   //Wheel enc pins init
   pinMode(CHA_L, INPUT_PULLUP); //left wheel encoder A with an internal pulluip resistor
   pinMode(CHB_L, INPUT_PULLUP);
@@ -135,8 +151,10 @@ void setup() {
   {
     pin = Actuator[i];
     pinMode(pin, OUTPUT);
-    digitalWrite(Actuator[i], LOW);
+    //digitalWrite(Actuator[i], LOW);
+    analogWriteFrequency (Actuator[i], 1000); //PWM freq = 1KHz actuator pins rather than the default 488 Hz PWM update without this statement
   }
+  /*
   for ( i = 0; i < 10; i++) //turn off actuators asap
   {
     for (j = 1; j < 7 ; j++)
@@ -144,7 +162,7 @@ void setup() {
       digitalWrite(Actuator[j], LOW);
     }
   }
-
+  */
   /* //servo stuff
     Ch1PeriodFlt = 1500;  //seed the filter value to idle position
     SteerServoOut.attach(22);  // Attach servo steering signal to pin 22
@@ -279,53 +297,76 @@ void loop() {
     if (InByte == 49) { //ASCII "1"   Pulse all actuators for 50ms
       for (j = 1; j < 7 ; j++)    //turn them all on
       {
-        digitalWrite(Actuator[j], HIGH);  //turn on
+        //digitalWrite(Actuator[j], HIGH);  //turn on
+        analogWrite (Actuator[j], ActuatorAmplitude);
       }
       delay(50);
       for (j = 1; j < 7 ; j++)
       {
-        digitalWrite(Actuator[j], LOW);   //turn off
+        //digitalWrite(Actuator[j], LOW);   //turn off
+        analogWrite (Actuator[j], 0);
       }
     }
     if (InByte == 50) { //ASCII "2"  Pulse left 2 actuators for 50ms
       for (j = 1; j < 3 ; j++)
       {
-        digitalWrite(Actuator[j], HIGH);
+        //digitalWrite(Actuator[j], HIGH);
+        analogWrite (Actuator[j], ActuatorAmplitude);
       }
       delay(50);
 
       for (j = 1; j < 3 ; j++)
       {
-        digitalWrite(Actuator[j], LOW);
+       //digitalWrite(Actuator[j], LOW);
+       analogWrite (Actuator[j], 0);
       }
     }
 
     if (InByte == 51) { //ASCII "3"  Pulse right 2 actuators for 50ms
       for (j = 5; j < 7 ; j++)
       {
-        digitalWrite(Actuator[j], HIGH);
+        //digitalWrite(Actuator[j], HIGH);
+        analogWrite (Actuator[j], ActuatorAmplitude);
       }
       delay(50);
 
       for (j = 5; j < 7 ; j++)
       {
-        digitalWrite(Actuator[j], LOW);
+        //digitalWrite(Actuator[j], LOW);
+        analogWrite (Actuator[j], 0);        
       }
     }
 
     if (InByte == 52) { //ASCII "4"  Turn all actuators on forever
       for (j = 1; j < 7  ; j++)
       {
-        digitalWrite(Actuator[j], HIGH);
+        //digitalWrite(Actuator[j], HIGH);
+        analogWrite (Actuator[j], ActuatorAmplitude);
       }
     }
 
-     if (InByte == 53) { //ASCII "5"  Turn all actuators on forever
+     if (InByte == 53) { //ASCII "5"  Turn all actuators off forever
       for (j = 1; j < 7  ; j++)
       {
-        digitalWrite(Actuator[j], LOW);
+        //digitalWrite(Actuator[j], LOW);
+        analogWrite (Actuator[j], 0);
       }
-    }   
+    }
+
+     if (InByte == 54) { //ASCII "6"  Set ActuatorAmplitude to max (255)
+        ActuatorAmplitude = 255;  //set to max
+      }
+
+     if (InByte == 55) { //ASCII "7"  Set ActuatorAmplitude to mid (128)
+        //digitalWrite(Actuator[j], LOW);
+        ActuatorAmplitude = 128;  //set to mid
+      }
+
+     if (InByte == 56) { //ASCII "8"  Set ActuatorAmplitude to min (64)
+        //digitalWrite(Actuator[j], LOW);
+        ActuatorAmplitude = 64;  //set to min
+      }
+  
   }
 
   if (TorqueSensor.is_ready()) {  //if true, following will operate @ ~10Hz rate. read strain guage torque sensor thru I2C comm
