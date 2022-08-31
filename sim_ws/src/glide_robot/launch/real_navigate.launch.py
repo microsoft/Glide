@@ -19,12 +19,12 @@ def generate_launch_description():
   default_model_path = os.path.join(pkg_share, 'models/glide_description.urdf')
   robot_localization_file_path = os.path.join(pkg_share, 'config/ekf.yaml') 
   robot_name_in_urdf = 'glide_bot'
-  default_rviz_config_path = os.path.join(pkg_share, 'rviz/nav2_config_2.rviz')
+  default_rviz_config_path = os.path.join(pkg_share, 'rviz/nav2_config.rviz')
   world_file_name = 'glide_robot_world/hwlabcorridor.world'
   world_path = os.path.join(pkg_share, 'worlds', world_file_name)
   nav2_dir = FindPackageShare(package='nav2_bringup').find('nav2_bringup') 
   nav2_launch_dir = os.path.join(nav2_dir, 'launch') 
-  static_map_path = os.path.join(pkg_share, 'maps', '99_hallway_remount.yaml')
+  static_map_path = os.path.join(pkg_share, 'maps', '99_hallway_study_remake.yaml')
   nav2_params_path = os.path.join(pkg_share, 'params', 'nav2_params.yaml')
   nav2_bt_path = FindPackageShare(package='nav2_bt_navigator').find('nav2_bt_navigator')
   behavior_tree_xml_path = os.path.join(nav2_bt_path, 'behavior_trees', 'navigate_w_replanning_and_recovery.xml')
@@ -107,7 +107,7 @@ def generate_launch_description():
 
   declare_use_rviz_cmd = DeclareLaunchArgument(
     name='use_rviz',
-    default_value='True',
+    default_value='False',
     description='Whether to start RVIZ')
     
   declare_use_sim_time_cmd = DeclareLaunchArgument(
@@ -163,7 +163,6 @@ def generate_launch_description():
     condition=IfCondition(use_rviz),
     package='rviz2',
     executable='rviz2',
-    prefix=['xterm -e gdb -ex run --args'],
     name='rviz2',
     output='screen',
     arguments=['-d', rviz_config_file])    
@@ -190,6 +189,32 @@ def generate_launch_description():
                         'default_bt_xml_filename': default_bt_xml_filename,
                         'autostart': autostart}.items())
 
+  parameters=[{
+        'frame_id':'base_footprint',
+        'subscribe_depth':True,
+      #   'subscribe_rgbd': True,
+        'imu_topic':'/camera/imu/sample',
+        'wait_imu_to_init': True,
+        'subscribe_scan': True,
+        'approx_sync':False,
+      #   "fill_holes_size": 2,
+        "visual_odometry":True,
+        "publish_null_when_lost": False,
+        "Odom/ResetCountdown": "1"}]
+
+  remappings=[
+        ('rgb/image', '/camera/color/image_raw'),
+        ('imu', '/imu/data'),
+      #   ('rgbd/image', "/camera/aligned_depth_to_color/image_raw")
+        ('rgb/camera_info', '/camera/color/camera_info'),
+        ('depth/image', '/camera/aligned_depth_to_color/image_raw')]
+
+  rgbd_odometry = Node(
+      package='rtabmap_ros', executable='rgbd_odometry', output='screen',
+      parameters=parameters,
+      remappings=remappings
+  )
+
   # Create the launch description and populate
   ld = LaunchDescription()
 
@@ -211,12 +236,13 @@ def generate_launch_description():
   # ld.add_action(declare_world_cmd)
 
   # Add any actions
+  # ld.add_action(rgbd_odometry)
   # ld.add_action(start_gazebo_server_cmd)
   # ld.add_action(start_gazebo_client_cmd)
   ld.add_action(start_robot_localization_cmd)
-  ld.add_action(start_robot_state_publisher_cmd)
+  # ld.add_action(start_robot_state_publisher_cmd)
   ld.add_action(start_rviz_cmd)
   ld.add_action(start_ros2_navigation_cmd)
   # ld.add_action(depth_to_laser_scan_cmd)
-
+  
   return ld

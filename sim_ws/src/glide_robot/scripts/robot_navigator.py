@@ -162,7 +162,7 @@ class BasicNavigator(Node):
         if not self.result_future:
             # task was cancelled or completed
             return True
-        rclpy.spin_until_future_complete(self, self.result_future, timeout_sec=0.10)
+        rclpy.spin_until_future_complete(self, self.result_future, timeout_sec=0.005)
         if self.result_future.result():
             self.status = self.result_future.result().status
             if self.status != GoalStatus.STATUS_SUCCEEDED:

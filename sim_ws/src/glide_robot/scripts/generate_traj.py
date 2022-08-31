@@ -67,7 +67,7 @@ def get_quaternion_from_euler(roll, pitch, yaw):
 
 def create_spline_traj(x, y):
     tck, u = interpolate.splprep([x,y], s=0.0)
-    x_i, y_i= interpolate.splev(np.linspace(0,1,100), tck)
+    x_i, y_i= interpolate.splev(np.linspace(0,1,300), tck)
 
     time_stamp = Clock().now().to_msg()
     path = []

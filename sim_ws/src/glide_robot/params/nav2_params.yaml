@@ -94,6 +94,7 @@ controller_server:
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
     min_theta_velocity_threshold: 0.001
+    failure_tolerance: 2.0
     progress_checker_plugin: "progress_checker"
     goal_checker_plugin: "goal_checker"
     controller_plugins: ["FollowPath"]
@@ -101,12 +102,12 @@ controller_server:
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
       required_movement_radius: 0.5
-      movement_time_allowance: 10.0
+      movement_time_allowance: 2.0
     goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.4
+      xy_goal_tolerance: 1.0
       yaw_goal_tolerance: 3.14
-      stateful: True
+      stateful: False
     FollowPath:
       # plugin: "dwb_core::DWBLocalPlanner"
       # debug_trajectory_details: True
@@ -131,78 +132,79 @@ controller_server:
       # linear_granularity: 0.05
       # angular_granularity: 0.025
       # transform_tolerance: 0.2
-      # xy_goal_tolerance: 0.25
+      # xy_goal_tolerance: 0.2
       # trans_stopped_velocity: 0.25
       # short_circuit_trajectory_evaluation: True
       # stateful: True
-      # critics: ["Oscillation", "BaseObstacle", "PathAlign", "PathDist", "GoalDist"]
-      # BaseObstacle.scale: 0.02
+      # critics: ["PathAlign", "GoalAlign", "PathDist", "GoalDist"]
       # PathAlign.scale: 32.0
-      # PathAlign.forward_point_distance: 0.1
+      # GoalAlign.scale: 24.0
+      # PathAlign.forward_point_distance: 2.0
+      # GoalAlign.forward_point_distance: 2.0
       # PathDist.scale: 32.0
       # GoalDist.scale: 24.0
 
-      plugin: "teb_local_planner::TebLocalPlannerROS"
-      map_frame: "/map"
-      footprint_model.type: two_circles
-      footprint_model.front_offset: 0.0
-      footprint_model.front_radius: 0.2
-      footprint_model.rear_offset: 0.5
-      footprint_model.rear_radius: 0.3
-      min_obstacle_dist: 0.2
-      inflation_dist: 0.2
-      costmap_converter_plugin: costmap_converter::CostmapToLinesDBSRANSAC
-      costmap_converter_spin_thread: True
-      costmap_converter_rate: 15.0
-      enable_homotopy_class_planning: True
-      enable_multithreading: True
-      #weight_obstacle: 100.0
-      optimization_verbose: False
-      weight_kinematics_turning_radius: 2.0
-      teb_autoresize: True
-      min_samples: 3
-      max_samples: 200
-      max_global_plan_lookahead_dist: 1.0
-      visualize_hc_graph: True
-      max_vel_x: 0.26
-      max_vel_theta: 0.9
-      max_vel_backwards: 0.0
-      acc_lim_x: 2.5
-      acc_lim_theta: 1.57
-      min_turning_radius: 0.0       # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
-      wheelbase: 0.145                 # Wheelbase of our robot
-      cmd_angle_instead_rotvel: false # stage simulator takes the angle instead of the rotvel as input (twist message)
-      global_plan_overwrite_orientation: True
-      yaw_goal_tolerance: 3.14
-      xy_goal_tolerance: 0.4
-      
-      # plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
-      # desired_linear_vel: 0.5
-      # max_linear_accel: 2.5
-      # max_linear_decel: 2.5
-      # lookahead_dist: 0.6
-      # min_lookahead_dist: 0.3
-      # max_lookahead_dist: 0.9
-      # lookahead_time: 1.5
-      # rotate_to_heading_angular_vel: 0.8
-      # transform_tolerance: 0.1
-      # use_velocity_scaled_lookahead_dist: false
-      # min_approach_linear_velocity: 0.05
-      # use_approach_linear_velocity_scaling: true
-      # max_allowed_time_to_collision: 2.0
-      # use_regulated_linear_velocity_scaling: true
-      # use_cost_regulated_linear_velocity_scaling: false
-      # regulated_linear_scaling_min_radius: 0.4
-      # regulated_linear_scaling_min_speed: 0.25
-      # use_rotate_to_heading: false
-      # use_interpolation: true
-      # rotate_to_heading_min_angle: 0.785
-      # max_angular_accel: 3.2
-      # goal_dist_tol: 0.25
-      # cost_scaling_dist: 0.3
-      # cost_scaling_gain: 1.0
-      # inflation_cost_scaling_factor: 3.0
-      # approach_velocity_scaling_dist: 0.05
+      # plugin: "teb_local_planner::TebLocalPlannerROS"
+      # map_frame: "/map"
+      # footprint_model.type: two_circles
+      # footprint_model.front_offset: 0.0
+      # footprint_model.front_radius: 0.2
+      # footprint_model.rear_offset: 0.5
+      # footprint_model.rear_radius: 0.3
+      # min_obstacle_dist: 0.2
+      # inflation_dist: 0.2
+      # costmap_converter_plugin: costmap_converter::CostmapToLinesDBSRANSAC
+      # costmap_converter_spin_thread: True
+      # costmap_converter_rate: 15.0
+      # enable_homotopy_class_planning: True
+      # enable_multithreading: True
+      # #weight_obstacle: 100.0
+      # optimization_verbose: False
+      # weight_kinematics_turning_radius: 2.0
+      # teb_autoresize: True
+      # min_samples: 3
+      # max_samples: 200
+      # max_global_plan_lookahead_dist: 1.0
+      # visualize_hc_graph: True
+      # max_vel_x: 0.26
+      # max_vel_theta: 0.9
+      # max_vel_backwards: 0.0
+      # acc_lim_x: 2.5
+      # acc_lim_theta: 1.57
+      # min_turning_radius: 0.0       # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
+      # wheelbase: 0.145                 # Wheelbase of our robot
+      # cmd_angle_instead_rotvel: false # stage simulator takes the angle instead of the rotvel as input (twist message)
+      # global_plan_overwrite_orientation: True
+      # yaw_goal_tolerance: 3.14
+      # xy_goal_tolerance: 0.4
+
+      plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
+      desired_linear_vel: 0.5
+      max_linear_accel: 2.5
+      max_linear_decel: 2.5
+      lookahead_dist: 0.6
+      min_lookahead_dist: 0.3
+      max_lookahead_dist: 0.9
+      lookahead_time: 1.5
+      rotate_to_heading_angular_vel: 0.8
+      transform_tolerance: 0.1
+      use_velocity_scaled_lookahead_dist: false
+      min_approach_linear_velocity: 0.05
+      use_approach_linear_velocity_scaling: true
+      max_allowed_time_to_collision: 2.0
+      use_regulated_linear_velocity_scaling: true
+      use_cost_regulated_linear_velocity_scaling: false
+      regulated_linear_scaling_min_radius: 0.4
+      regulated_linear_scaling_min_speed: 0.25
+      use_rotate_to_heading: false
+      use_interpolation: false
+      rotate_to_heading_min_angle: 0.785
+      max_angular_accel: 3.2
+      goal_dist_tol: 1.0
+      cost_scaling_dist: 0.3
+      cost_scaling_gain: 1.0
+      inflation_cost_scaling_factor: 3.0
+      approach_velocity_scaling_dist: 0.05
 
 controller_server_rclcpp_node:
   ros__parameters:
