@@ -7,6 +7,7 @@ import json
 import rclpy
 from rclpy.node import Node
 from time import sleep
+from geometry_msgs.msg import PoseStamped
 
 class GlobalPlanPublisher(Node):
     def __init__(self):
@@ -47,30 +48,60 @@ if __name__ == '__main__':
 
     node = rclpy.create_node('path_pub')
     publisher = node.create_publisher(Path, 'plan', 10)
-    publisher.publish(ros_msg)
-    rclpy.spin_once(publisher, timeout_sec=1.0)
+    while rclpy.ok():
+        publisher.publish(ros_msg)
+        sleep(0.5)
+        break
+    # rclpy.spin_once(publisher, timeout_sec=1.0)
 
     navigator = BasicNavigator()
     navigator.waitUntilNav2Active()
     navigator.clearLocalCostmap()
-    max_retries = 3
+
+    initial_pose = PoseStamped()
+    initial_pose.header.frame_id = 'map'
+    initial_pose.header.stamp = navigator.get_clock().now().to_msg()
+    initial_pose.pose.position.x = 0.0
+    initial_pose.pose.position.y = 0.0
+    initial_pose.pose.position.z = 0.0
+    initial_pose.pose.orientation.x = 0.0
+    initial_pose.pose.orientation.y = 0.0
+    initial_pose.pose.orientation.z = -0.7071068
+    initial_pose.pose.orientation.w = 0.7071068
+    navigator.setInitialPose(initial_pose)
+
+    max_retries = 1000
     num_retries = 0
     retry = True
 
-    while retry == True and num_retries < max_retries:
-        feedback = execute_plan(navigator, ros_msg)
-        result = navigator.getResult()
-        if result == NavigationResult.SUCCEEDED:
-            print('Goal succeeded!')
-            retry = False
-        elif result == NavigationResult.CANCELED:
-            print('Goal was canceled!')
-            retry = False
-        elif result == NavigationResult.FAILED:
-            print('Goal failed!')
-            if feedback.distance_to_goal > 0.5 and num_retries < max_retries:
-                retry = True
-                num_retries += 1
-                print('Retrying...')
-        else:
-            print('Goal has an invalid return status!')
+    try:
+        while retry == True and num_retries < max_retries:
+            feedback = execute_plan(navigator, ros_msg)
+            result = navigator.getResult()
+            if result == NavigationResult.SUCCEEDED:
+                print('Goal succeeded!')
+                retry = False
+            elif result == NavigationResult.CANCELED:
+                print('Goal was canceled!')
+                retry = False
+            elif result == NavigationResult.FAILED:
+                print('Goal failed!')
+                if feedback.distance_to_goal > 0.5 and num_retries < max_retries:
+                    retry = True
+                    navigator.clearLocalCostmap()
+                    navigator.cancelNav()
+                    num_retries += 1
+                    print('Retrying...')
+            else:
+                print('Goal has an invalid return status!')
+    except KeyboardInterrupt:
+        navigator.cancelNav()
+        # navigator.lifecycleShutdown()
+        navigator.destroy_node()
+        # rclpy.shutdown()
+        exit(0)
+        
+    # navigator.lifecycleShutdown()
+    navigator.destroy_node()
+    # rclpy.shutdown()
+    exit(0)
