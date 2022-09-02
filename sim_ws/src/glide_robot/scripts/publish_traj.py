@@ -8,31 +8,106 @@ import rclpy
 from rclpy.node import Node
 from time import sleep
 from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Int32
+from geometry_msgs.msg import Twist
 
-class GlobalPlanPublisher(Node):
-    def __init__(self):
-        super().__init__('global_plan_publisher')
-        self.publisher = self.create_publisher(
-            Path,
-            'plan',
+class ExperimentA(Node):
+    def __init__(self, navigator, path):
+        super().__init__('experiment_A')
+        
+        self.navigator = navigator
+        self.path = path 
+
+        # Publishing haptic gestures
+        self.haptic_publisher = self.create_publisher(
+            Int32,
+            'microROS/haptic',
             10
         )
 
-    def publish(self, msg):
-        self.publisher.publish(msg)
+        self.path_publisher = self.create_publisher(
+            Path, 
+            'plan', 
+            10
+        )
 
-def execute_plan(navigator, plan):
-    navigator.goThroughPoses(plan)
-    feedback = navigator.getFeedback()
-    i = 0
-    while not navigator.isNavComplete():
-        feedback = navigator.getFeedback()
-        if feedback and i % 5 == 0:
-            print('Distance remaining: ' + '{:.2f}'.format(
-                feedback.distance_to_goal) + ' meters.')
-        i += 1
-    return feedback
+        # Publishing velocities
+        self.cmdvel_publisher = self.create_publisher(
+            Twist,
+            'cmd_vel',
+            10
+        )
 
+        initial_pose = PoseStamped()
+        initial_pose.header.frame_id = 'map'
+        initial_pose.header.stamp = navigator.get_clock().now().to_msg()
+        initial_pose.pose.position.x = 0.0
+        initial_pose.pose.position.y = 0.0
+        initial_pose.pose.position.z = 0.0
+        initial_pose.pose.orientation.x = 0.0
+        initial_pose.pose.orientation.y = 0.0
+        initial_pose.pose.orientation.z = -0.7071068
+        initial_pose.pose.orientation.w = 0.7071068
+        self.navigator.setInitialPose(initial_pose)
+        
+        twist = Twist()
+        twist.linear.x = -1.0
+        twist.angular.z = 0.0
+        self.cmdvel_publisher.publish(twist)
+        
+        self.run()
+
+    def execute_plan(self):
+        self.navigator.goThroughPoses(self.path)
+        feedback = self.navigator.getFeedback()
+        i = 0
+        while not self.navigator.isNavComplete():
+            feedback = self.navigator.getFeedback()
+            if feedback and i % 5 == 0:
+                print('Distance remaining: ' + '{:.2f}'.format(
+                    feedback.distance_to_goal) + ' meters.')
+            i += 1
+        return feedback
+
+    def run(self):
+        publish_slowdown_gesture = True
+        while True:
+            feedback = self.execute_plan()
+            if feedback and publish_slowdown_gesture and feedback.distance_to_goal < 2.0:
+                gesture = Int32()
+                gesture.data = 1
+                self.haptic_publisher.publish(gesture)
+                publish_slowdown_gesture = False
+
+            result = navigator.getResult()
+            if result == NavigationResult.SUCCEEDED:
+                print('Goal succeeded!')
+
+                # Engage brakes
+                twist = Twist()
+                twist.linear.x = 1.0
+                twist.angular.z = 0.0
+                self.cmdvel_publisher.publish(twist)
+            
+                sleep(2)
+                
+                # Release brakes
+                twist = Twist()
+                twist.linear.x = -1.0
+                twist.angular.z = 0.0
+                self.cmdvel_publisher.publish(twist)
+
+                self.navigator.cancelNav()
+                self.navigator.destroy_node()
+                exit(0)
+            elif result == NavigationResult.CANCELED:
+                print('Goal was canceled!')
+            elif result == NavigationResult.FAILED:
+                print('Goal failed!')
+                print('Retrying...')
+            else:
+                print('Goal has an invalid return status!')
+            
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--traj_file', help="Name of the file in the trajectories subdirectory")
@@ -46,62 +121,14 @@ if __name__ == '__main__':
 
     rclpy.init()
 
-    node = rclpy.create_node('path_pub')
-    publisher = node.create_publisher(Path, 'plan', 10)
-    while rclpy.ok():
-        publisher.publish(ros_msg)
-        sleep(0.5)
-        break
-    # rclpy.spin_once(publisher, timeout_sec=1.0)
-
     navigator = BasicNavigator()
     navigator.waitUntilNav2Active()
     navigator.clearAllCostmaps()
 
-    initial_pose = PoseStamped()
-    initial_pose.header.frame_id = 'map'
-    initial_pose.header.stamp = navigator.get_clock().now().to_msg()
-    initial_pose.pose.position.x = 0.0
-    initial_pose.pose.position.y = 0.0
-    initial_pose.pose.position.z = 0.0
-    initial_pose.pose.orientation.x = 0.0
-    initial_pose.pose.orientation.y = 0.0
-    initial_pose.pose.orientation.z = -0.7071068
-    initial_pose.pose.orientation.w = 0.7071068
-    navigator.setInitialPose(initial_pose)
+    experimentNode = ExperimentA(navigator, ros_msg)
 
-    max_retries = 1000
-    num_retries = 0
-    retry = True
+    rclpy.spin(experimentNode)
 
-    try:
-        while retry == True and num_retries < max_retries:
-            feedback = execute_plan(navigator, ros_msg)
-            result = navigator.getResult()
-            if result == NavigationResult.SUCCEEDED:
-                print('Goal succeeded!')
-                break
-            elif result == NavigationResult.CANCELED:
-                print('Goal was canceled!')
-                retry = False
-            elif result == NavigationResult.FAILED:
-                print('Goal failed!')
-                if feedback and feedback.distance_to_goal > 0.5:
-                    # retry = True
-                    # navigator.clearLocalCostmap()
-                    # navigator.cancelNav()
-                    # num_retries += 1
-                    print('Retrying...')
-            else:
-                print('Goal has an invalid return status!')
-    except KeyboardInterrupt:
-        navigator.cancelNav()
-        # navigator.lifecycleShutdown()
-        navigator.destroy_node()
-        # rclpy.shutdown()
-        exit(0)
-        
-    # navigator.lifecycleShutdown()
+    navigator.cancelNav()
     navigator.destroy_node()
-    # rclpy.shutdown()
     exit(0)

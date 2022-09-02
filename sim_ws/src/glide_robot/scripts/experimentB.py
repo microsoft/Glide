@@ -28,7 +28,7 @@ class ExperimentB(Node):
         super().__init__('experiment_B')
 
         self.navigator = navigator
-        self.override_traj = True
+        self.override_traj = False
         self.execute_traj = True
         self.engage_slowdown_haptic = True
         self.init_dist_to_goal = 0
@@ -59,9 +59,18 @@ class ExperimentB(Node):
             Int32,
             'microROS/haptic',
             self.haptic_callback,
-            10
+            1
         )
         self.haptic_subscriber 
+
+        self.torque_subscriber = self.create_subscription(
+            Int32,
+            'microROS/torque',
+            self.torque_callback,
+            10
+        )
+        self.torque_subscriber  # prevent unused variable warning
+        self.last_torque = 250
 
         self.trajectories_dict = {
             'start': {
@@ -123,7 +132,7 @@ class ExperimentB(Node):
         twist.angular.z = 0.0
         self.cmdvel_publisher.publish(twist)
         
-        self.traj_idx = 'start'
+        self.traj_idx = 'traj_0_straight'
         self.current_traj = self.trajectory_msgs['traj_0_straight']
 
         self.timer = self.create_timer(1, self.run)
@@ -132,7 +141,6 @@ class ExperimentB(Node):
         STOP_HAPTIC_GESTURE = 1
         LEFT_HAPTIC_GESTURE = 2
         RIGHT_HAPTIC_GESTURE = 3
-        print('callback')
 
         if msg.data == LEFT_HAPTIC_GESTURE and self.override_traj:
             print('TURN LEFT')
@@ -146,7 +154,7 @@ class ExperimentB(Node):
             self.execute_traj = True
 
         elif msg.data == RIGHT_HAPTIC_GESTURE and self.override_traj:
-            print(self.traj_idx)
+            print('TURN RIGHT')
             traj_idx = self.trajectories_dict[self.traj_idx]['right']
             # Do not do anything if trajectory is invalid
             if not self.valid_direction(traj_idx):
@@ -165,6 +173,28 @@ class ExperimentB(Node):
         twist.linear.x = -1.0
         twist.angular.z = 0.0
         self.cmdvel_publisher.publish(twist)
+
+    def torque_callback(self, msg):
+        LEFT_TORQUE_THRESHOLD = 150
+        RIGHT_TORQUE_THRESHOLD = 350
+        LEFT_HAPTIC_GESTURE = 2
+        RIGHT_HAPTIC_GESTURE = 3
+
+        torque = msg.data
+
+        msg_channel_haptic = Int32()
+
+        # Check last torque value so gesture does not continually publish
+        if torque <= LEFT_TORQUE_THRESHOLD and self.last_torque > LEFT_TORQUE_THRESHOLD:
+            msg_channel_haptic.data = LEFT_HAPTIC_GESTURE
+            self.haptic_publisher.publish(msg_channel_haptic)
+
+        elif torque >= RIGHT_TORQUE_THRESHOLD and self.last_torque < RIGHT_TORQUE_THRESHOLD:
+            msg_channel_haptic.data = RIGHT_HAPTIC_GESTURE
+            self.haptic_publisher.publish(msg_channel_haptic)
+            #self.publisher_haptic.publish(msg_channel_haptic)
+
+        self.last_torque = torque
 
     def valid_direction(self, traj_idx):
         # If inputted direction valid return
@@ -222,7 +252,7 @@ class ExperimentB(Node):
                 self.haptic_publisher.publish(gesture)
                 self.haptic_publisher.publish(gesture)
 
-            if feedback and i % 5 == 0:
+            if feedback and i % 200 == 0:
                 print('Distance remaining: ' + '{:.2f}'.format(
                     feedback.distance_to_goal) + ' meters.')
 
@@ -260,8 +290,20 @@ class ExperimentB(Node):
                 self.cmdvel_publisher.publish(twist)
                 self.execute_traj = False
                 self.override_traj = True
+                self.engage_slowdown_haptic = True
                 print('Goal succeeded!')
                 self.current_traj = ''
+
+                if self.traj_idx not in self.trajectories_dict.keys():
+                    sleep(2)
+                    # Release brakes
+                    twist = Twist()
+                    twist.linear.x = -1.0
+                    twist.angular.z = 0.0
+                    self.cmdvel_publisher.publish(twist)
+                    self.navigator.cancelNav()
+                    self.navigator.destroy_node()
+                    exit(0)
 
                 print(self.traj_idx)
                 traj_idx = self.trajectories_dict[self.traj_idx]['straight']
@@ -275,8 +317,6 @@ class ExperimentB(Node):
                     self.cmdvel_publisher.publish(twist)
                     self.current_traj = self.trajectory_msgs[traj_idx]
                 
-                self.engage_slowdown_haptic = True
-
                 # if self.traj_idx == "traj_2_left":
                 #     initial_pose = PoseStamped()
                 #     initial_pose.header.frame_id = 'map'
