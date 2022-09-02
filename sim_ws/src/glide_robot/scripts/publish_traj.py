@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
     navigator = BasicNavigator()
     navigator.waitUntilNav2Active()
-    navigator.clearLocalCostmap()
+    navigator.clearAllCostmaps()
 
     initial_pose = PoseStamped()
     initial_pose.header.frame_id = 'map'
@@ -80,17 +80,17 @@ if __name__ == '__main__':
             result = navigator.getResult()
             if result == NavigationResult.SUCCEEDED:
                 print('Goal succeeded!')
-                retry = False
+                break
             elif result == NavigationResult.CANCELED:
                 print('Goal was canceled!')
                 retry = False
             elif result == NavigationResult.FAILED:
                 print('Goal failed!')
-                if feedback.distance_to_goal > 0.5 and num_retries < max_retries:
-                    retry = True
-                    navigator.clearLocalCostmap()
-                    navigator.cancelNav()
-                    num_retries += 1
+                if feedback and feedback.distance_to_goal > 0.5:
+                    # retry = True
+                    # navigator.clearLocalCostmap()
+                    # navigator.cancelNav()
+                    # num_retries += 1
                     print('Retrying...')
             else:
                 print('Goal has an invalid return status!')
