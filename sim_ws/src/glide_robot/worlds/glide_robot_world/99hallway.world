@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<sdf version="1.4">
+  <world name="default">
+    <model name="99hallway">
+      <static>true</static>
+      <link name="ground">
+          <pose>0 0 0 0 0 0</pose>
+          <collision name="ground_collision">
+              <geometry>
+                  <box>
+                      <size>50 50 0.1</size>
+                  </box>
+              </geometry>
+          </collision>
+
+          <visual name="ground_visual">
+              <geometry>
+                  <box>
+                      <size>50 50 0.1</size>
+                  </box>
+              </geometry>
+          </visual>
+        </link>
+    </model>
+
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose frame=''>35.0 3.5 43.0 0.0 0.85 -3.1295</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
+    </gui>
+
+    <include>
+      <!-- <pose>-6.85 5.25 5 0 0 0</pose> -->
+      <pose>0 0 0.0 0.0 0.0 0</pose>
+      <uri>model://99-hallway</uri>
+      <!-- <scale>0.35 0.4 0.4</scale> -->
+    </include>
+    <include>
+      <!-- Set the location where we want to spawn the robot -->
+      <pose>0 0 0.0 0.0 0.0 0</pose>
+      <!-- basic_mobile_robot -->
+      <uri>model://sim_glide_description</uri>
+    </include>
+  </world>
+</sdf>
