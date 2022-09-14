@@ -82,6 +82,7 @@ class BasicNavigator(Node):
         self.initial_pose_received = False
         self.initial_pose = initial_pose
         self._setInitialPose()
+        self.clearAllCostmaps()
 
     def goThroughPoses(self, poses):
         # Sends a `NavThroughPoses` action request

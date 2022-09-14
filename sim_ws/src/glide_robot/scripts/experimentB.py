@@ -10,6 +10,7 @@ from time import sleep
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Int32
 from geometry_msgs.msg import Twist
+from time import time
 
 class GlobalPlanPublisher(Node):
     def __init__(self):
@@ -54,6 +55,13 @@ class ExperimentB(Node):
             10
         )
 
+        # Publishing haptic amplitude
+        self.haptic_amplitude_publisher = self.create_publisher(
+            Int32,
+            'microROS/haptic_amplitude',
+            10
+        )
+
         # Subscribe to haptic gesture
         self.haptic_subscriber = self.create_subscription(
             Int32,
@@ -73,31 +81,37 @@ class ExperimentB(Node):
         self.last_torque = 250
 
         self.trajectories_dict = {
+            # 'start': {
+            #     'left': '',
+            #     'right': '',
+            #     'straight': 'traj_0_straight'
+            # },
+            # 'traj_0_straight': {
+            #     'left': 'traj_1_left',
+            #     'right': '',
+            #     'straight': '',
+            # },
             'start': {
-                'left': '',
+                'left': 'traj_0_left',
                 'right': '',
-                'straight': 'traj_0_straight'
+                'straight': ''
             },
-            'traj_0_straight': {
-                'left': 'traj_1_left',
-                'right': '',
-                'straight': '',
-            },
-            'traj_1_left': {
+            'traj_0_left': {
                 'left': 'traj_2_left',
                 'right': '',
-                'straight': 'traj_2_straight',
+                'straight': 'traj_2_straight_left',
             },
             'traj_2_left': {
                 'left': 'traj_3_left',
                 'right': 'traj_3_right',
                 'straight': ''
             },
-            'traj_2_straight': {
-                'left': 'traj_4_left',
-                'right': '',
-                'straight': ''
-            }, 'traj_4_left': {
+            # 'traj_2_straight': {
+            #     'left': 'traj_4_left',
+            #     'right': '',
+            #     'straight': ''
+            # }, 
+            'traj_2_straight_left': {
                 'left': '',
                 'right': 'traj_5_right',
                 'straight': 'traj_5_straight'
@@ -132,11 +146,17 @@ class ExperimentB(Node):
         twist.angular.z = 0.0
         self.cmdvel_publisher.publish(twist)
         
-        self.traj_idx = 'traj_0_straight'
-        self.current_traj = self.trajectory_msgs['traj_0_straight']
+        amplitude = Int32()
+        amplitude.data = 70
+        self.haptic_amplitude_publisher.publish(amplitude)
+        self.haptic_amplitude_publisher.publish(amplitude)
 
-        self.timer = self.create_timer(1, self.run)
-        
+        self.traj_idx = 'traj_0_left'
+        self.current_traj = self.trajectory_msgs['traj_0_left']
+
+        self.timer = self.create_timer(0.5, self.run)
+        self.start = time()
+
     def haptic_callback(self, msg):
         STOP_HAPTIC_GESTURE = 1
         LEFT_HAPTIC_GESTURE = 2
@@ -303,6 +323,8 @@ class ExperimentB(Node):
                     self.cmdvel_publisher.publish(twist)
                     self.navigator.cancelNav()
                     self.navigator.destroy_node()
+                    end = time()
+                    print(end-self.start)
                     exit(0)
 
                 print(self.traj_idx)
@@ -337,8 +359,9 @@ class ExperimentB(Node):
             elif result == NavigationResult.FAILED:
                 print('Goal failed!')
                 # if feedback.distance_to_goal > 0.5:
-                #     self.navigator.clearLocalCostmap()
-                #     self.navigator.cancelNav()
+                self.navigator.clearLocalCostmap()
+                # self.navigator.clearAllCostmaps()
+                self.navigator.cancelNav()
                 #     print('Retrying...')
             else:
                 print('Goal has an invalid return status!')
@@ -384,3 +407,5 @@ if __name__ == '__main__':
     experimentNode.cmdvel_publisher.publish(twist)
 
     experimentNode.destroy_node()
+    end = time()
+    print(end - start)

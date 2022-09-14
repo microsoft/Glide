@@ -10,6 +10,7 @@ from time import sleep
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Int32
 from geometry_msgs.msg import Twist
+from time import time
 
 class ExperimentA(Node):
     def __init__(self, navigator, path):
@@ -22,6 +23,13 @@ class ExperimentA(Node):
         self.haptic_publisher = self.create_publisher(
             Int32,
             'microROS/haptic',
+            10
+        )
+
+        # Publishing haptic amplitude
+        self.haptic_amplitude_publisher = self.create_publisher(
+            Int32,
+            'microROS/haptic_amplitude',
             10
         )
 
@@ -55,6 +63,11 @@ class ExperimentA(Node):
         twist.angular.z = 0.0
         self.cmdvel_publisher.publish(twist)
         
+        amplitude = Int32()
+        amplitude.data = 70
+        self.haptic_amplitude_publisher.publish(amplitude)
+        self.haptic_amplitude_publisher.publish(amplitude)
+
         self.run()
 
     def execute_plan(self):
@@ -70,6 +83,7 @@ class ExperimentA(Node):
         return feedback
 
     def run(self):
+        start = time()
         publish_slowdown_gesture = True
         while True:
             feedback = self.execute_plan()
@@ -99,11 +113,14 @@ class ExperimentA(Node):
 
                 self.navigator.cancelNav()
                 self.navigator.destroy_node()
+                end = time()
+                print(end - start)
                 exit(0)
             elif result == NavigationResult.CANCELED:
                 print('Goal was canceled!')
             elif result == NavigationResult.FAILED:
                 print('Goal failed!')
+                self.navigator.clearLocalCostmap()
                 print('Retrying...')
             else:
                 print('Goal has an invalid return status!')
