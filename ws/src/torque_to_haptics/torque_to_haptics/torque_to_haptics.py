@@ -24,10 +24,10 @@ class TorqueToHapticsPublisher(Node):
     self.last_torque = 250
 
   def torque_callback(self, msg):
-    LEFT_TORQUE_THRESHOLD = 150
-    RIGHT_TORQUE_THRESHOLD = 350
-    LEFT_HAPTIC_GESTURE = 2
-    RIGHT_HAPTIC_GESTURE = 3
+    LEFT_TORQUE_THRESHOLD = 150 # experimentally chosen
+    RIGHT_TORQUE_THRESHOLD = 350 # experimentally chosen
+    LEFT_HAPTIC_GESTURE = 2 # defined in the firmware file: Glide/blob/main/ws/src/teensy-microros/microros/microros.ino
+    RIGHT_HAPTIC_GESTURE = 3 # defined in the firmware file: Glide/blob/main/ws/src/teensy-microros/microros/microros.ino
 
     torque = msg.data
 

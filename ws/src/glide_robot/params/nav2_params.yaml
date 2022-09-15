@@ -6,7 +6,7 @@ amcl:
     alpha3: 0.002
     alpha4: 0.002
     alpha5: 0.002
-    base_frame_id: "base_footprint"
+    base_frame_id: "base_footprint" # The base_link frame in the urdf
     beam_skip_distance: 0.5
     beam_skip_error_threshold: 0.9
     beam_skip_threshold: 0.3
@@ -27,7 +27,7 @@ amcl:
     recovery_alpha_fast: 0.0
     recovery_alpha_slow: 0.0
     resample_interval: 1
-    robot_model_type: "differential"
+    robot_model_type: "differential" # nav2 doesn't support ackermann drive; it will crash if you try it
     save_pose_rate: 0.5
     set_initial_pose: True
     sigma_hit: 0.2
@@ -39,7 +39,7 @@ amcl:
     z_max: 0.05
     z_rand: 0.5
     z_short: 0.05
-    scan_topic: scan
+    scan_topic: scan # depthimage_to_laserscan node publishes a /scan topic 
   
 amcl_map_client:
   ros__parameters:
@@ -58,7 +58,7 @@ bt_navigator:
     enable_groot_monitoring: True
     groot_zmq_publisher_port: 1666
     groot_zmq_server_port: 1667
-    default_bt_xml_filename: "navigate_w_replanning_and_recovery.xml"
+    default_bt_xml_filename: "navigate_w_replanning_and_recovery.xml" # TODO: You will want to create a custom behavior tree
     plugin_lib_names:
     - nav2_compute_path_to_pose_action_bt_node
     - nav2_follow_path_action_bt_node
@@ -101,49 +101,15 @@ controller_server:
 
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
-      required_movement_radius: 0.5
+      required_movement_radius: 0.5 # meters that the robot needs to move in the movement_time_allowance (seconds) before the controller fails
       movement_time_allowance: 2.0
     goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.75
-      yaw_goal_tolerance: 3.14
+      xy_goal_tolerance: 0.75 # xy tolerance in meters
+      yaw_goal_tolerance: 3.14 # We don't care about the goal heading so I set it to a high value (radians)
       stateful: False
     FollowPath:
-      # plugin: "dwb_core::DWBLocalPlanner"
-      # debug_trajectory_details: True
-      # min_vel_x: 0.0
-      # min_vel_y: 0.0
-      # max_vel_x: 0.26
-      # max_vel_y: 0.0
-      # max_vel_theta: 0.8
-      # min_speed_xy: 0.0
-      # max_speed_xy: 0.26
-      # min_speed_theta: 0.0
-      # acc_lim_x: 2.5
-      # acc_lim_y: 0.0
-      # acc_lim_theta: 3.2
-      # decel_lim_x: -2.5
-      # decel_lim_y: 0.0
-      # decel_lim_theta: -3.2
-      # vx_samples: 20
-      # vy_samples: 5
-      # vtheta_samples: 20
-      # sim_time: 1.7
-      # linear_granularity: 0.05
-      # angular_granularity: 0.025
-      # transform_tolerance: 0.2
-      # xy_goal_tolerance: 0.2
-      # trans_stopped_velocity: 0.25
-      # short_circuit_trajectory_evaluation: True
-      # stateful: True
-      # critics: ["PathAlign", "GoalAlign", "PathDist", "GoalDist"]
-      # PathAlign.scale: 32.0
-      # GoalAlign.scale: 24.0
-      # PathAlign.forward_point_distance: 2.0
-      # GoalAlign.forward_point_distance: 2.0
-      # PathDist.scale: 32.0
-      # GoalDist.scale: 24.0
-
+      # This controller implements a turning radius which is better ackermann drive but there are issues with the Costmap converter plugin crashing
       # plugin: "teb_local_planner::TebLocalPlannerROS"
       # map_frame: "/map"
       # footprint_model.type: two_circles
@@ -153,7 +119,7 @@ controller_server:
       # footprint_model.rear_radius: 0.3
       # min_obstacle_dist: 0.2
       # inflation_dist: 0.2
-      # costmap_converter_plugin: costmap_converter::CostmapToLinesDBSRANSAC
+      # costmap_converter_plugin: costmap_converter::CostmapToLinesDBSRANSAC # memory leaks
       # costmap_converter_spin_thread: True
       # costmap_converter_rate: 15.0
       # enable_homotopy_class_planning: True
@@ -178,6 +144,7 @@ controller_server:
       # yaw_goal_tolerance: 3.14
       # xy_goal_tolerance: 0.4
 
+      # Follow the global plan as close as possible but doesn't taking the turning radius into account
       plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
       desired_linear_vel: 0.5
       max_linear_accel: 2.5
@@ -196,12 +163,12 @@ controller_server:
       use_cost_regulated_linear_velocity_scaling: false
       regulated_linear_scaling_min_radius: 0.4
       regulated_linear_scaling_min_speed: 0.25
-      use_rotate_to_heading: false
+      use_rotate_to_heading: false 
       use_interpolation: false
       rotate_to_heading_min_angle: 0.785
       max_angular_accel: 3.2
       goal_dist_tol: 1.0
-      cost_scaling_dist: 0.3
+      cost_scaling_dist: 0.3 
       cost_scaling_gain: 1.0
       inflation_cost_scaling_factor: 3.0
       approach_velocity_scaling_dist: 0.05
@@ -227,7 +194,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.3
+        inflation_radius: 0.3 # inflation radius for obstacles in meters
       voxel_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
@@ -237,9 +204,9 @@ local_costmap:
         z_voxels: 16
         max_obstacle_height: 2.0
         # mark_threshold: 0
-        observation_sources: scan
+        observation_sources: scan 
         scan:
-          topic: /scan
+          topic: /scan # scan topic outputted by the depthimage_to_laserscan node
           max_obstacle_height: 2.0
           clearing: True
           marking: True
@@ -282,7 +249,7 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.15 
+        inflation_radius: 0.3 # inflation radius for obstacles in meters
       always_send_full_costmap: True
   global_costmap_client:
     ros__parameters:
@@ -291,19 +258,19 @@ global_costmap:
     ros__parameters:
       use_sim_time: False
 
-map_server:
-  ros__parameters:
-    use_sim_time: False
-    yaml_filename: "/home/vinitha/Glide/sim_ws/src/glide_robot/maps/map.yaml"
+# map_server:
+#   ros__parameters:
+#     use_sim_time: False
+#     yaml_filename: "/home/vinitha/Glide/sim_ws/src/glide_robot/maps/map.yaml"
 
-map_saver:
-  ros__parameters:
-    use_sim_time: False
-    save_map_timeout: 5000
-    free_thresh_default: 0.25
-    occupied_thresh_default: 0.65
-    map_subscribe_transient_local: False
-    save_map_timeout: 5000
+# map_saver:
+#   ros__parameters:
+#     use_sim_time: False
+#     save_map_timeout: 5000
+#     free_thresh_default: 0.25
+#     occupied_thresh_default: 0.65
+#     map_subscribe_transient_local: False
+#     save_map_timeout: 5000
 
 planner_server:
   ros__parameters:
@@ -312,6 +279,7 @@ planner_server:
 
     GridBased:
       plugin: "smac_planner/SmacPlanner"
+      # plugin: "smac_planner/SmacPlanner2D"
       # plugin: "nav2_navfn_planner/NavfnPlanner"
       downsample_costmap: false           # whether or not to downsample the map
       downsampling_factor: 1              # multiplier for the resolution of the costmap layer (e.g. 2 on a 5cm costmap would be 10cm)
@@ -353,7 +321,7 @@ recoveries_server:
     cycle_frequency: 10.0
     recovery_plugins: ["spin", "back_up", "wait"]
     spin:
-      plugin: "nav2_recoveries/Spin"
+      plugin: "nav2_recoveries/Spin" # TODO: remove after making custom behavior tree
     back_up:
       plugin: "nav2_recoveries/BackUp"
     wait:

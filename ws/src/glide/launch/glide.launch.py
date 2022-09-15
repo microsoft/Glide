@@ -179,6 +179,7 @@ def generate_launch_description():
                         'autostart': 'True'}.items())
 
 
+    # TODO: Should merge all static transforms into glide_description.urdf
     base_to_realsense = Node(
         package="tf2_ros",
         executable="static_transform_publisher",
@@ -213,7 +214,7 @@ def generate_launch_description():
         ros_qwiic_servo,
         micro_ros_agent,
         cmdvel_to_servo,
-        #torque_to_haptics,
+        #torque_to_haptics, # uncomment if you want haptics all time
         wheel_odom,
         realsense2_camera,
         depth_to_laser_scan,

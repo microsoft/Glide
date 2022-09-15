@@ -87,6 +87,7 @@ def generate_launch_description():
     default_value='False',
     description='Whether to run SLAM')
 
+  # Better to launch rviz separately in case it crashes and you need to restart it. Set to True if you want to launch rviz in this launch file.
   declare_use_rviz_cmd = DeclareLaunchArgument(
     name='use_rviz',
     default_value='False',

@@ -12,6 +12,7 @@ from std_msgs.msg import Int32
 from geometry_msgs.msg import Twist
 from time import time
 
+# Point to point navigation 
 class Mode1(Node):
     def __init__(self, navigator, path):
         super().__init__('mode_1')

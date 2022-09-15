@@ -12,9 +12,10 @@ from std_msgs.msg import Int32
 from geometry_msgs.msg import Twist
 from time import time
 
-class ExperimentB(Node):
+# Shared-Control Mode
+class Mode2(Node):
     def __init__(self, navigator):
-        super().__init__('experiment_B')
+        super().__init__('mode2')
 
         self.navigator = navigator
         self.override_traj = False
@@ -356,17 +357,17 @@ if __name__ == '__main__':
     navigator.waitUntilNav2Active()
     navigator.clearAllCostmaps()
 
-    experimentNode = ExperimentB(navigator)
-    experimentNode.run()
+    node = Mode2(navigator)
+    node.run()
 
-    rclpy.spin(experimentNode)
+    rclpy.spin(node)
 
     twist = Twist()
     twist.linear.x = -1.0
     twist.angular.z = 0.0
-    experimentNode.cmdvel_publisher.publish(twist)
-    experimentNode.cmdvel_publisher.publish(twist)
+    node.cmdvel_publisher.publish(twist)
+    node.cmdvel_publisher.publish(twist)
 
-    experimentNode.destroy_node()
+    node.destroy_node()
     end = time()
     print(end - start)

@@ -59,13 +59,14 @@ class WheelOdomNode(Node):
         self.timer = self.create_timer(0.5, self.timer_callback)
 
         self.left_wheel_enc_sub = message_filters.Subscriber(self, Int32, '/microROS/odometry_left')
-        self.left_m_per_pulse = 0.0008165846
+        self.left_m_per_pulse = 0.0008165846 # experimentally measured based on wheel diameters (meters)
         
         self.right_wheel_enc_sub = message_filters.Subscriber(self, Int32, '/microROS/odometry_right')
-        self.right_m_per_pulse = 0.00082122518
+        self.right_m_per_pulse = 0.00082122518 # experimentally measured based on wheel diameters (meters)
 
         self.imu_sub = message_filters.Subscriber(self, Imu, '/imu/data')
 
+        # Time synchronizer to get the messages at the same timestamp for both wheels and imu
         self.wheel_enc_sub = message_filters.ApproximateTimeSynchronizer([self.left_wheel_enc_sub, self.right_wheel_enc_sub, self.imu_sub], 5, 0.2, allow_headerless=True)
         self.wheel_enc_sub.registerCallback(self.compute_odom)
 
@@ -92,7 +93,7 @@ class WheelOdomNode(Node):
         _, _, th = euler_from_quaternion(imu.orientation.x, imu.orientation.y, imu.orientation.z, imu.orientation.w)
 
         vx = (v_l + v_r)/2
-        vth = (v_l - v_r)/0.2332482
+        vth = (v_l - v_r)/0.2332482 # wheel separation (meters)?
 
         self.x += vx * math.cos(self.th) * dt
         self.y += vx * math.sin(self.th) * dt
@@ -100,6 +101,7 @@ class WheelOdomNode(Node):
 
         qx, qy, qz, qw = get_quaternion_from_euler(0, 0, self.th)
 
+        # For broadcasting odometry messages if you choose to only do wheel odometry
         # odom_tf = TransformStamped()
         # odom_tf.header.stamp = self.current_time
         # odom_tf.header.frame_id = "odom"
