@@ -55,6 +55,14 @@ def generate_launch_description():
         output='screen',
     )
 
+    # ros2 run wheel_odom wheel_odom_node
+    wheel_odom = Node(
+        package='wheel_odom',
+        executable='wheel_odom_node',
+        name='wheel_odom',
+        output='screen',
+    )
+
     param_config = os.path.join(get_package_share_directory('depthimage_to_laserscan'), 'cfg', 'param.yaml')
     depth_to_laser_scan = Node(
         package='depthimage_to_laserscan',
@@ -113,30 +121,61 @@ def generate_launch_description():
         remappings=[('/imu/data_raw', '/camera/imu')]
     )
 
+    pkg_share = FindPackageShare(package='glide_robot').find('glide_robot')
+
     # Subscribe to the joint states of the robot, and publish the 3D pose of each link.
-    default_model_path = '/Glide/sim_ws/src/glide_robot/models/glide_description.urdf'
+    default_model_path = os.path.join(pkg_share, 'models/glide_description.urdf')
     model = LaunchConfiguration('model')
+    declare_model_path_cmd = DeclareLaunchArgument(
+        name='model',
+        default_value=default_model_path,
+        description='Absolute path to robot urdf file')
     state_publisher_remappings = [('/tf', 'tf'),
-                 ('/tf_static', 'tf_static')]
+                                  ('/tf_static', 'tf_static')]
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         remappings=state_publisher_remappings,
+        parameters=[{'use_sim_time': 'False', 
+        'robot_description': Command(['xacro ', model])}],
         arguments=[default_model_path])
     
-    map_yaml_file = '/Glide/sim_ws/src/glide_robot/maps/map.yaml'
+    # Start robot localization using an Extended Kalman filter
+    robot_localization_file_path = os.path.join(pkg_share, 'config/ekf.yaml') 
+    robot_localization = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node',
+        output='screen',
+        parameters=[robot_localization_file_path,
+        {'use_sim_time': 'False'}])
+
+    static_map_path = os.path.join(pkg_share, 'maps', '99_hallway_study_final.yaml')
+    map_yaml_file = LaunchConfiguration('map')
+    declare_map_yaml_cmd = DeclareLaunchArgument(
+        name='map',
+        default_value=static_map_path,
+        description='Full path to map file to load')
+
+    nav2_params_path = os.path.join(pkg_share, 'params', 'nav2_params.yaml')
+    params_file = LaunchConfiguration('params_file')
+    declare_params_file_cmd = DeclareLaunchArgument(
+        name='params_file',
+        default_value=nav2_params_path,
+        description='Full path to the ROS2 parameters file to use for all launched nodes')
+
     nav2_dir = FindPackageShare(package='nav2_bringup').find('nav2_bringup') 
     nav2_launch_dir = os.path.join(nav2_dir, 'launch') 
     nav2_bt_path = FindPackageShare(package='nav2_bt_navigator').find('nav2_bt_navigator')
     behavior_tree_xml_path = os.path.join(nav2_bt_path, 'behavior_trees', 'navigate_w_replanning_and_recovery.xml')
-    start_ros2_navigation = IncludeLaunchDescription(
+    ros2_navigation = IncludeLaunchDescription(
     PythonLaunchDescriptionSource(os.path.join(nav2_launch_dir, 'bringup_launch.py')),
     launch_arguments = {'namespace': '',
                         'use_namespace': 'False',
                         'slam': 'False',
                         'map': map_yaml_file,
                         'use_sim_time': 'False',
-                        'params_file': '/Glide/sim_ws/src/glide_robot/params/nav2_params.yaml',
+                        'params_file': params_file,
                         'default_bt_xml_filename': behavior_tree_xml_path,
                         'autostart': 'True'}.items())
 
@@ -175,16 +214,23 @@ def generate_launch_description():
         ros_qwiic_servo,
         micro_ros_agent,
         cmdvel_to_servo,
-        torque_to_haptics,
+        #torque_to_haptics,
+        wheel_odom,
         realsense2_camera,
         depth_to_laser_scan,
         rgbd_odometry,
-        #rtabmap,
+        #rtabmap, # Uncomment for SLAM
         imu_filter,
+        declare_model_path_cmd,
         robot_state_publisher,
         base_to_realsense,
         base_to_front_left_wheel,
         base_to_front_right_wheel,
         base_to_rear_left_wheel,
-        base_to_rear_right_wheel
+        base_to_rear_right_wheel,
+        # Uncomment the following to run nav2
+        # robot_localization,
+        # declare_map_yaml_cmd,
+        # declare_params_file_cmd,
+        # ros2_navigation
     ])
