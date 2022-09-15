@@ -12,18 +12,6 @@ from std_msgs.msg import Int32
 from geometry_msgs.msg import Twist
 from time import time
 
-class GlobalPlanPublisher(Node):
-    def __init__(self):
-        super().__init__('global_plan_publisher')
-        self.publisher = self.create_publisher(
-            Path,
-            'plan',
-            10
-        )
-
-    def publish(self, msg):
-        self.publisher.publish(msg)
-
 class ExperimentB(Node):
     def __init__(self, navigator):
         super().__init__('experiment_B')
@@ -338,21 +326,6 @@ class ExperimentB(Node):
                     twist.angular.z = 0.0
                     self.cmdvel_publisher.publish(twist)
                     self.current_traj = self.trajectory_msgs[traj_idx]
-                
-                # if self.traj_idx == "traj_2_left":
-                #     initial_pose = PoseStamped()
-                #     initial_pose.header.frame_id = 'map'
-                #     initial_pose.header.stamp = self.navigator.get_clock().now().to_msg()
-                #     initial_pose.pose.position.x = 7.38787
-                #     initial_pose.pose.position.y = 16.8
-                #     initial_pose.pose.position.z = 0.0
-                #     initial_pose.pose.orientation.x = 0.0
-                #     initial_pose.pose.orientation.y = 0.0
-                #     initial_pose.pose.orientation.z = 0.7071068
-                #     initial_pose.pose.orientation.w = 0.7071068
-                #     self.navigator.setInitialPose(initial_pose)
-                #     self.navigator.setInitialPose(initial_pose)
-
                 return
             elif result == NavigationResult.CANCELED:
                 print('Goal was canceled!')
@@ -377,19 +350,7 @@ class ExperimentB(Node):
             exit(0)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--traj_file', help="Name of the file in the trajectories subdirectory")
-    args = parser.parse_args()
-
     rclpy.init()
-
-    # node = rclpy.create_node('path_pub')
-    # publisher = node.create_publisher(Path, 'plan', 10)
-    # while rclpy.ok():
-    #     publisher.publish(ros_msg)
-    #     sleep(0.5)
-        # break
-    # rclpy.spin_once(publisher, timeout_sec=1.0)
 
     navigator = BasicNavigator()
     navigator.waitUntilNav2Active()

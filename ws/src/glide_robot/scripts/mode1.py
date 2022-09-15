@@ -12,9 +12,9 @@ from std_msgs.msg import Int32
 from geometry_msgs.msg import Twist
 from time import time
 
-class ExperimentA(Node):
+class Mode1(Node):
     def __init__(self, navigator, path):
-        super().__init__('experiment_A')
+        super().__init__('mode_1')
         
         self.navigator = navigator
         self.path = path 
@@ -142,9 +142,9 @@ if __name__ == '__main__':
     navigator.waitUntilNav2Active()
     navigator.clearAllCostmaps()
 
-    experimentNode = ExperimentA(navigator, ros_msg)
+    node = Mode1(navigator, ros_msg)
 
-    rclpy.spin(experimentNode)
+    rclpy.spin(node)
 
     navigator.cancelNav()
     navigator.destroy_node()

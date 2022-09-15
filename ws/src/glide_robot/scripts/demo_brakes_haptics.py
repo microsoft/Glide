@@ -25,23 +25,28 @@ class DemoBrakesHaptics(Node):
         while True:
             value = input()
             if value == 's':
+                # slowdown haptic
                 gesture = Int32()
                 gesture.data = 1
                 self.haptic_publisher.publish(gesture)
             elif value == 'l':
+                # turn left haptic
                 gesture = Int32()
                 gesture.data = 2
                 self.haptic_publisher.publish(gesture)
             elif value == 'r':
+                # turn right haptic
                 gesture = Int32()
                 gesture.data = 3
                 self.haptic_publisher.publish(gesture)
             elif value == 'b':
+                # engage brakes
                 twist = Twist()
                 twist.linear.x = 1.0
                 twist.angular.z = 0.0
                 self.cmdvel_publisher.publish(twist)
             elif value == 'u':
+                # release brakes
                 twist = Twist()
                 twist.linear.x = -1.0
                 twist.angular.z = 0.0

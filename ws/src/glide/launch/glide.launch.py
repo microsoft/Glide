@@ -63,6 +63,7 @@ def generate_launch_description():
         output='screen',
     )
 
+    # ros2 run  depthimage_to_laserscan depthimage_to_laserscan_node
     param_config = os.path.join(get_package_share_directory('depthimage_to_laserscan'), 'cfg', 'param.yaml')
     depth_to_laser_scan = Node(
         package='depthimage_to_laserscan',
@@ -76,12 +77,10 @@ def generate_launch_description():
     parameters=[{
           'frame_id':'base_footprint',
           'subscribe_depth':True,
-        #   'subscribe_rgbd': True,
           'imu_topic':'/camera/imu/sample',
           'wait_imu_to_init': True,
           'subscribe_scan': True,
           'approx_sync':False,
-        #   "fill_holes_size": 2,
           "visual_odometry":True,
           "publish_null_when_lost": False,
           "Odom/ResetCountdown": "1"}]
@@ -89,17 +88,17 @@ def generate_launch_description():
     remappings=[
           ('rgb/image', '/camera/color/image_raw'),
           ('imu', '/imu/data'),
-        #   ('rgbd/image', "/camera/aligned_depth_to_color/image_raw")
           ('rgb/camera_info', '/camera/color/camera_info'),
           ('depth/image', '/camera/aligned_depth_to_color/image_raw')]
 
+    # ros2 run rtabmap_ros rgbd_odometry
     rgbd_odometry = Node(
-
         package='rtabmap_ros', executable='rgbd_odometry', output='screen',
         parameters=parameters,
         remappings=remappings
     )
 
+    # ros2 run rtabmap_ros rtabmap
     rtabmap = Node(
         package='rtabmap_ros', executable='rtabmap', output='screen',
         parameters=parameters,
