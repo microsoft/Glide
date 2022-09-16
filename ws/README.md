@@ -11,7 +11,7 @@ Build the workspace:
 cd Glide/
 git submodule init
 git submodule update
-cd sim_ws/
+cd ws/
 colcon build
 source install/setup.bash
 ```
@@ -30,7 +30,7 @@ The script will launch RViz and Gazebo environment. In RViz, click "Navigation2 
 
 
 ## Glide Demo
-SSH into Glide and run the docker container:
+SSH into Glide and run the docker container. You can find the IP Address by typing `ip neighb`. Make sure your local machine and Glide are on the same network:
 ```bash
 ssh jetbot@IP_ADDRESS
 cd repos/Glide
@@ -72,9 +72,31 @@ cd ~/Glide/ws/src/glide/scripts
 python3 mode2.py
 ```
 
+## Running SLAM
+Uncomment `rtabmap` in the `LaunchDescription` in `glide.launch.py`. Rebuild the workspace by running `colcon build`. Run `glide.launch.py` on Glide and `real_navigate.launch.py` and `rviz` on your local machine. When you are done generating your map, run:
+```
+ros2 run nav2_map_server map_saver_cli --fmt png --ros-args -p save_map_timeout:=10000
+```
+This will save the map and the yaml description file in your current working directory.
+
 ## Creating new Trajectories
+If creating trajectories in simulation, launch `sim_navigate.launch.py` and `rviz` on your local machine. If creating trajectories in the real world, launch `glide.launch.py` on Glide and `real_navigate.launch.py` and `rviz` on your local machine. Run:
+```
+cd ~/Glide/ws/src/glide/scripts
+python3 generate_traj.py
+```
+Click `Waypoint Mode` in Rviz and add waypoints by clicking `Navigation2 Goal` and selecting a waypoint position on the map. When you are done selecting waypoints type `Ctrl+C` and enter the name of the trajectory file. The file will be saved as a  `.json` file in the `trajectories` subdirectory.
 
 ## Testing Brakes and Haptics
+```
+cd ~/Glide/ws/src/glide/scripts
+python3 demo_brakes_haptics.py
+```
+* Type `s` and `Enter` to engage the slow down haptic
+* Type `l` and `Enter` to engage the left turn haptic
+* Type `r` and `Enter` to engage the right turn haptic
+* Type `b` and `Enter` to engage the brakes
+* Type `u` and `Enter` to release the brakes
 
 ## Troubleshooting
 * **Rviz is crashing**: http://wiki.ros.org/rviz/Troubleshooting
