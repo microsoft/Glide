@@ -120,7 +120,7 @@ def generate_launch_description():
         remappings=[('/imu/data_raw', '/camera/imu')]
     )
 
-    pkg_share = FindPackageShare(package='glide_robot').find('glide_robot')
+    pkg_share = FindPackageShare(package='glide').find('glide')
 
     # Subscribe to the joint states of the robot, and publish the 3D pose of each link.
     default_model_path = os.path.join(pkg_share, 'models/glide_description.urdf')
