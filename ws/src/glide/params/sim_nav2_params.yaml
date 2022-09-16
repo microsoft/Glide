@@ -1,18 +1,20 @@
+# TODO: Update base frames when URDFs are are merged
 amcl:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: True
     alpha1: 0.002
     alpha2: 0.002
     alpha3: 0.002
     alpha4: 0.002
     alpha5: 0.002
-    base_frame_id: "base_footprint" # The base_link frame in the urdf
+    base_frame_id: "base_link"
     beam_skip_distance: 0.5
     beam_skip_error_threshold: 0.9
     beam_skip_threshold: 0.3
     do_beamskip: false
     global_frame_id: "map"
-    initial_pose: [0.0, 0.0, 0.0, 0.0]
+    # initial_pose: [0.0, 0.0, 0.0, -1.0]
+    # initial_pose.yaw: -0.1667
     lambda_short: 0.1
     laser_likelihood_max_dist: 2.0
     laser_max_range: 100.0
@@ -27,7 +29,7 @@ amcl:
     recovery_alpha_fast: 0.0
     recovery_alpha_slow: 0.0
     resample_interval: 1
-    robot_model_type: "differential" # nav2 doesn't support ackermann drive; it will crash if you try it
+    robot_model_type: "differential"
     save_pose_rate: 0.5
     set_initial_pose: True
     sigma_hit: 0.2
@@ -39,26 +41,26 @@ amcl:
     z_max: 0.05
     z_rand: 0.5
     z_short: 0.05
-    scan_topic: scan # depthimage_to_laserscan node publishes a /scan topic 
+    scan_topic: scan
   
 amcl_map_client:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: True
 
 amcl_rclcpp_node:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: True
 
 bt_navigator:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: True
     global_frame: map
     robot_base_frame: base_link
-    odom_topic: /odom
+    odom_topic: /odometry/filtered
     enable_groot_monitoring: True
     groot_zmq_publisher_port: 1666
     groot_zmq_server_port: 1667
-    default_bt_xml_filename: "navigate_w_replanning_and_recovery.xml" # TODO: You will want to create a custom behavior tree
+    default_bt_xml_filename: "navigate_w_replanning_and_recovery.xml"
     plugin_lib_names:
     - nav2_compute_path_to_pose_action_bt_node
     - nav2_follow_path_action_bt_node
@@ -85,11 +87,11 @@ bt_navigator:
 
 bt_navigator_rclcpp_node:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: True
 
 controller_server:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: True
     controller_frequency: 20.0
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
@@ -101,17 +103,15 @@ controller_server:
 
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
-      required_movement_radius: 0.5 # meters that the robot needs to move in the movement_time_allowance (seconds) before the controller fails
+      required_movement_radius: 0.1
       movement_time_allowance: 2.0
     goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.75 # xy tolerance in meters
-      yaw_goal_tolerance: 3.14 # We don't care about the goal heading so I set it to a high value (radians)
+      xy_goal_tolerance: 0.75
+      yaw_goal_tolerance: 3.14
       stateful: False
     FollowPath:
-      # This controller implements a turning radius which is better ackermann drive but there are issues with the Costmap converter plugin crashing
       # plugin: "teb_local_planner::TebLocalPlannerROS"
-      # map_frame: "/map"
       # footprint_model.type: two_circles
       # footprint_model.front_offset: 0.0
       # footprint_model.front_radius: 0.2
@@ -119,7 +119,7 @@ controller_server:
       # footprint_model.rear_radius: 0.3
       # min_obstacle_dist: 0.2
       # inflation_dist: 0.2
-      # costmap_converter_plugin: costmap_converter::CostmapToLinesDBSRANSAC # memory leaks
+      # costmap_converter_plugin: costmap_converter::CostmapToLinesDBSMCCH
       # costmap_converter_spin_thread: True
       # costmap_converter_rate: 15.0
       # enable_homotopy_class_planning: True
@@ -137,16 +137,15 @@ controller_server:
       # max_vel_backwards: 0.0
       # acc_lim_x: 2.5
       # acc_lim_theta: 1.57
-      # min_turning_radius: 0.0       # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
+      # min_turning_radius: 0.2       # Min turning radius of the carlike robot (compute value using a model or adjust with rqt_reconfigure manually)
       # wheelbase: 0.145                 # Wheelbase of our robot
       # cmd_angle_instead_rotvel: false # stage simulator takes the angle instead of the rotvel as input (twist message)
       # global_plan_overwrite_orientation: True
       # yaw_goal_tolerance: 3.14
       # xy_goal_tolerance: 0.4
 
-      # Follow the global plan as close as possible but doesn't taking the turning radius into account
       plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
-      desired_linear_vel: 0.5
+      desired_linear_vel: 1.0
       max_linear_accel: 2.5
       max_linear_decel: 2.5
       lookahead_dist: 0.6
@@ -163,28 +162,27 @@ controller_server:
       use_cost_regulated_linear_velocity_scaling: false
       regulated_linear_scaling_min_radius: 0.4
       regulated_linear_scaling_min_speed: 0.25
-      use_rotate_to_heading: false 
+      use_rotate_to_heading: false
       use_interpolation: false
       rotate_to_heading_min_angle: 0.785
       max_angular_accel: 3.2
       goal_dist_tol: 1.0
-      cost_scaling_dist: 0.3 
+      cost_scaling_dist: 0.3
       cost_scaling_gain: 1.0
       inflation_cost_scaling_factor: 3.0
-      approach_velocity_scaling_dist: 0.05
 
 controller_server_rclcpp_node:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: True
 
 local_costmap:
   local_costmap:
     ros__parameters:
-      update_frequency: 10.0 
+      update_frequency: 2.0 
       publish_frequency: 2.0
       global_frame: map
       robot_base_frame: base_link
-      use_sim_time: False
+      use_sim_time: True
       rolling_window: true
       width: 10
       height: 10
@@ -194,7 +192,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.3 # inflation radius for obstacles in meters
+        inflation_radius: 0.3
       voxel_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
@@ -203,10 +201,9 @@ local_costmap:
         z_resolution: 0.05
         z_voxels: 16
         max_obstacle_height: 2.0
-        # mark_threshold: 0
-        observation_sources: scan 
+        observation_sources: scan
         scan:
-          topic: /scan # scan topic outputted by the depthimage_to_laserscan node
+          topic: /scan
           max_obstacle_height: 2.0
           clearing: True
           marking: True
@@ -216,19 +213,19 @@ local_costmap:
       always_send_full_costmap: True
   local_costmap_client:
     ros__parameters:
-      use_sim_time: False
+      use_sim_time: True
   local_costmap_rclcpp_node:
     ros__parameters:
-      use_sim_time: False
+      use_sim_time: True
 
 global_costmap:
   global_costmap:
     ros__parameters:
-      update_frequency: 10.0
+      update_frequency: 1.0
       publish_frequency: 1.0
       global_frame: map
       robot_base_frame: base_link
-      use_sim_time: False
+      use_sim_time: True
       robot_radius: 0.25
       resolution: 0.05
       track_unknown_space: true
@@ -249,33 +246,19 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.3 # inflation radius for obstacles in meters
+        inflation_radius: 0.3
       always_send_full_costmap: True
   global_costmap_client:
     ros__parameters:
-      use_sim_time: False
+      use_sim_time: True
   global_costmap_rclcpp_node:
     ros__parameters:
-      use_sim_time: False
-
-# map_server:
-#   ros__parameters:
-#     use_sim_time: False
-#     yaml_filename: "/home/vinitha/Glide/sim_ws/src/glide_robot/maps/map.yaml"
-
-# map_saver:
-#   ros__parameters:
-#     use_sim_time: False
-#     save_map_timeout: 5000
-#     free_thresh_default: 0.25
-#     occupied_thresh_default: 0.65
-#     map_subscribe_transient_local: False
-#     save_map_timeout: 5000
+      use_sim_time: True
 
 planner_server:
   ros__parameters:
     planner_plugins: ["GridBased"]
-    use_sim_time: False
+    use_sim_time: True
 
     GridBased:
       plugin: "smac_planner/SmacPlanner"
@@ -312,7 +295,7 @@ planner_server:
 
 planner_server_rclcpp_node:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: True
 
 recoveries_server:
   ros__parameters:
@@ -321,7 +304,7 @@ recoveries_server:
     cycle_frequency: 10.0
     recovery_plugins: ["spin", "back_up", "wait"]
     spin:
-      plugin: "nav2_recoveries/Spin" # TODO: remove after making custom behavior tree
+      plugin: "nav2_recoveries/Spin"
     back_up:
       plugin: "nav2_recoveries/BackUp"
     wait:
@@ -329,7 +312,7 @@ recoveries_server:
     global_frame: odom
     robot_base_frame: base_link
     transform_timeout: 0.1
-    use_sim_time: False
+    use_sim_time: True
     simulate_ahead_time: 1.0
     max_rotational_vel: 0.8
     min_rotational_vel: 0.4
@@ -337,7 +320,7 @@ recoveries_server:
 
 robot_state_publisher:
   ros__parameters:
-    use_sim_time: False
+    use_sim_time: True
     
 slam_toolbox:
   ros__parameters:
@@ -417,3 +400,17 @@ waypoint_follower:
   ros__parameters:
     loop_rate: 1
     stop_on_failure: false
+
+map_server:
+  ros__parameters:
+    use_sim_time: True
+    yaml_filename: "~/Glide/sim_ws/src/glide_robot/maps/99_hallway_sim.yaml"
+
+map_saver:
+  ros__parameters:
+    use_sim_time: True
+    save_map_timeout: 5000
+    free_thresh_default: 0.25
+    occupied_thresh_default: 0.65
+    map_subscribe_transient_local: False
+    save_map_timeout: 5000

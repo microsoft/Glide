@@ -1,3 +1,3 @@
-export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$PWD/src/glide_robot/models/
+export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$PWD/src/glide/models/
 source install/setup.bash
-ros2 launch glide_robot sim_navigate.launch.py
+ros2 launch glide sim_navigate.launch.py

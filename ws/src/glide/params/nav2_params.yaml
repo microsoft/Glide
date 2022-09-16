@@ -1,19 +1,19 @@
+# TODO: Update base frames when URDFs are are merged
 amcl:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False
     alpha1: 0.002
     alpha2: 0.002
     alpha3: 0.002
     alpha4: 0.002
     alpha5: 0.002
-    base_frame_id: "base_link"
+    base_frame_id: "base_footprint" # The base_link frame in the urdf
     beam_skip_distance: 0.5
     beam_skip_error_threshold: 0.9
     beam_skip_threshold: 0.3
     do_beamskip: false
     global_frame_id: "map"
-    # initial_pose: [0.0, 0.0, 0.0, -1.0]
-    # initial_pose.yaw: -0.1667
+    initial_pose: [0.0, 0.0, 0.0, 0.0]
     lambda_short: 0.1
     laser_likelihood_max_dist: 2.0
     laser_max_range: 100.0
@@ -28,38 +28,38 @@ amcl:
     recovery_alpha_fast: 0.0
     recovery_alpha_slow: 0.0
     resample_interval: 1
-    robot_model_type: "differential"
+    robot_model_type: "differential" # nav2 doesn't support ackermann drive; it will crash if you try it
     save_pose_rate: 0.5
     set_initial_pose: True
     sigma_hit: 0.2
     tf_broadcast: true
-    transform_tolerance: 5.0
+    transform_tolerance: 2.0
     update_min_a: 0.2
     update_min_d: 0.25
     z_hit: 0.5
     z_max: 0.05
     z_rand: 0.5
     z_short: 0.05
-    scan_topic: scan
+    scan_topic: scan # depthimage_to_laserscan node publishes a /scan topic 
   
 amcl_map_client:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False
 
 amcl_rclcpp_node:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False
 
 bt_navigator:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False
     global_frame: map
     robot_base_frame: base_link
     odom_topic: /odometry/filtered
     enable_groot_monitoring: True
     groot_zmq_publisher_port: 1666
     groot_zmq_server_port: 1667
-    default_bt_xml_filename: "navigate_w_replanning_and_recovery.xml"
+    default_bt_xml_filename: "navigate_w_replanning_and_recovery.xml" # TODO: You will want to create a custom behavior tree
     plugin_lib_names:
     - nav2_compute_path_to_pose_action_bt_node
     - nav2_follow_path_action_bt_node
@@ -86,38 +86,41 @@ bt_navigator:
 
 bt_navigator_rclcpp_node:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False
 
 controller_server:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False
     controller_frequency: 20.0
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
     min_theta_velocity_threshold: 0.001
+    failure_tolerance: 2.0
     progress_checker_plugin: "progress_checker"
     goal_checker_plugin: "goal_checker"
     controller_plugins: ["FollowPath"]
 
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
-      required_movement_radius: 0.5
-      movement_time_allowance: 10.0
+      required_movement_radius: 0.5 # meters that the robot needs to move in the movement_time_allowance (seconds) before the controller fails
+      movement_time_allowance: 2.0
     goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.25
-      yaw_goal_tolerance: 3.14
-      stateful: True
+      xy_goal_tolerance: 0.75 # xy tolerance in meters
+      yaw_goal_tolerance: 3.14 # We don't care about the goal heading so I set it to a high value (radians)
+      stateful: False
     FollowPath:
+      # This controller implements a turning radius which is better ackermann drive but there are issues with the Costmap converter plugin crashing
       # plugin: "teb_local_planner::TebLocalPlannerROS"
+      # map_frame: "/map"
       # footprint_model.type: two_circles
       # footprint_model.front_offset: 0.0
-      # footprint_model.front_radius: 0.3
-      # footprint_model.rear_offset: -0.5
+      # footprint_model.front_radius: 0.2
+      # footprint_model.rear_offset: 0.5
       # footprint_model.rear_radius: 0.3
-      # min_obstacle_dist: 0.3
-      # inflation_dist: 0.3
-      # costmap_converter_plugin: costmap_converter::CostmapToPolygonsDBSMCCH
+      # min_obstacle_dist: 0.2
+      # inflation_dist: 0.2
+      # costmap_converter_plugin: costmap_converter::CostmapToLinesDBSMCCH # memory leaks
       # costmap_converter_spin_thread: True
       # costmap_converter_rate: 15.0
       # enable_homotopy_class_planning: True
@@ -139,7 +142,10 @@ controller_server:
       # wheelbase: 0.145                 # Wheelbase of our robot
       # cmd_angle_instead_rotvel: false # stage simulator takes the angle instead of the rotvel as input (twist message)
       # global_plan_overwrite_orientation: True
+      # yaw_goal_tolerance: 3.14
+      # xy_goal_tolerance: 0.4
 
+      # Follow the global plan as close as possible but doesn't taking the turning radius into account
       plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
       desired_linear_vel: 1.0
       max_linear_accel: 2.5
@@ -148,27 +154,28 @@ controller_server:
       min_lookahead_dist: 0.3
       max_lookahead_dist: 0.9
       lookahead_time: 1.5
-      rotate_to_heading_angular_vel: 1.8
+      rotate_to_heading_angular_vel: 0.8
       transform_tolerance: 0.1
       use_velocity_scaled_lookahead_dist: false
       min_approach_linear_velocity: 0.05
       use_approach_linear_velocity_scaling: true
-      max_allowed_time_to_collision: 1.0
+      max_allowed_time_to_collision: 2.0
       use_regulated_linear_velocity_scaling: true
       use_cost_regulated_linear_velocity_scaling: false
       regulated_linear_scaling_min_radius: 0.4
       regulated_linear_scaling_min_speed: 0.25
-      use_rotate_to_heading: true
+      use_rotate_to_heading: false 
+      use_interpolation: false
       rotate_to_heading_min_angle: 0.785
       max_angular_accel: 3.2
-      goal_dist_tol: 0.15
-      cost_scaling_dist: 0.3
+      goal_dist_tol: 1.0
+      cost_scaling_dist: 0.3 
       cost_scaling_gain: 1.0
       inflation_cost_scaling_factor: 3.0
 
 controller_server_rclcpp_node:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False
 
 local_costmap:
   local_costmap:
@@ -177,29 +184,28 @@ local_costmap:
       publish_frequency: 2.0
       global_frame: odom
       robot_base_frame: base_link
-      use_sim_time: True
+      use_sim_time: False
       rolling_window: true
       width: 10
       height: 10
       resolution: 0.05
-      robot_radius: 0.3
+      robot_radius: 0.25
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.2
+        inflation_radius: 0.3 # inflation radius for obstacles in meters
       voxel_layer:
-        plugin: "nav2_costmap_2d::VoxelLayer"
+        plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
         publish_voxel_map: True
         origin_z: 0.0
         z_resolution: 0.05
         z_voxels: 16
         max_obstacle_height: 2.0
-        mark_threshold: 0
-        observation_sources: scan
+        observation_sources: scan 
         scan:
-          topic: /scan
+          topic: /scan # scan topic outputted by the depthimage_to_laserscan node
           max_obstacle_height: 2.0
           clearing: True
           marking: True
@@ -209,20 +215,20 @@ local_costmap:
       always_send_full_costmap: True
   local_costmap_client:
     ros__parameters:
-      use_sim_time: True
+      use_sim_time: False
   local_costmap_rclcpp_node:
     ros__parameters:
-      use_sim_time: True
+      use_sim_time: False
 
 global_costmap:
   global_costmap:
     ros__parameters:
       update_frequency: 1.0
       publish_frequency: 1.0
-      global_frame: map
+      global_frame: odom
       robot_base_frame: base_link
-      use_sim_time: True
-      robot_radius: 0.7
+      use_sim_time: False
+      robot_radius: 0.25
       resolution: 0.05
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
@@ -242,36 +248,23 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.2
+        inflation_radius: 0.3 # inflation radius for obstacles in meters
       always_send_full_costmap: True
   global_costmap_client:
     ros__parameters:
-      use_sim_time: True
+      use_sim_time: False
   global_costmap_rclcpp_node:
     ros__parameters:
-      use_sim_time: True
-
-map_server:
-  ros__parameters:
-    use_sim_time: True
-    yaml_filename: "/home/vinitha/Glide/sim_ws/src/glide_robot/maps/map.yaml"
-
-map_saver:
-  ros__parameters:
-    use_sim_time: True
-    save_map_timeout: 5000
-    free_thresh_default: 0.25
-    occupied_thresh_default: 0.65
-    map_subscribe_transient_local: False
-    save_map_timeout: 5000
+      use_sim_time: False
 
 planner_server:
   ros__parameters:
     planner_plugins: ["GridBased"]
-    use_sim_time: True
+    use_sim_time: False
 
     GridBased:
       plugin: "smac_planner/SmacPlanner"
+      # plugin: "smac_planner/SmacPlanner2D"
       # plugin: "nav2_navfn_planner/NavfnPlanner"
       downsample_costmap: false           # whether or not to downsample the map
       downsampling_factor: 1              # multiplier for the resolution of the costmap layer (e.g. 2 on a 5cm costmap would be 10cm)
@@ -304,7 +297,7 @@ planner_server:
 
 planner_server_rclcpp_node:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False
 
 recoveries_server:
   ros__parameters:
@@ -313,7 +306,7 @@ recoveries_server:
     cycle_frequency: 10.0
     recovery_plugins: ["spin", "back_up", "wait"]
     spin:
-      plugin: "nav2_recoveries/Spin"
+      plugin: "nav2_recoveries/Spin" # TODO: remove after making custom behavior tree
     back_up:
       plugin: "nav2_recoveries/BackUp"
     wait:
@@ -321,15 +314,15 @@ recoveries_server:
     global_frame: odom
     robot_base_frame: base_link
     transform_timeout: 0.1
-    use_sim_time: True
-    simulate_ahead_time: 2.0
-    max_rotational_vel: 1.0
+    use_sim_time: False
+    simulate_ahead_time: 1.0
+    max_rotational_vel: 0.8
     min_rotational_vel: 0.4
     rotational_acc_lim: 3.2
 
 robot_state_publisher:
   ros__parameters:
-    use_sim_time: True
+    use_sim_time: False
     
 slam_toolbox:
   ros__parameters:
@@ -347,7 +340,7 @@ slam_toolbox:
     map_frame: map
     base_frame: base_link
     scan_topic: /scan
-    mode: mapping #localization
+    mode: localization
 
     # if you'd like to immediately start continuing a map at a given pose
     # or at the dock, but they are mutually exclusive, if pose is given
