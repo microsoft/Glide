@@ -17,4 +17,4 @@
 [submodule "ws/src/ros2_message_converter"]
 	path = ws/src/ros2_message_converter
 	url = https://github.com/dustingooding/ros2_message_converter.git
-	branch = 2-time-sec-nanosec
+	branch = feature/2-time-sec-nanosec
