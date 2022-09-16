@@ -19,7 +19,7 @@ source install/setup.bash
 ## Simulation Examples
 To view the urdf run:
 ```
-ros2 launch glide_robot vis_urdf.launch.py
+ros2 launch glide vis_urdf.launch.py
 ```
 
 To navigate the robot to a goal location run:
@@ -48,23 +48,27 @@ cd Glide/ws
 source install/setup.bash
 ros2 launch glide glide.launch.py
 ```
+When the odometry node is running you will see a output log similar to:
+```
+[rgbd_odometry-7] [INFO] [1663345266.940393219] [rgbd_odometry]: Odom: quality=257, std dev=0.007528m|0.073978rad, update time=0.115913s
+```
 
 On your local machine launch the robot localization node and nav2:
 ```
-ros2 launch glide_robot real_navigate.launch.py
+ros2 launch glide real_navigate.launch.py
 ```
 Wait until you see `Activating bt_navigator`, `Activating waypoint_follower` and `Managed nodes are active` in the outputted log. (You might have to wait ~30s) Then launch `rviz`:
 ```bash
-ros2 run rviz2 rviz2 -d ~/Glide/ws/src/glide_robot/rviz/nav2_config.rviz
+ros2 run rviz2 rviz2 -d ~/Glide/ws/src/glide/rviz/nav2_config.rviz
 ```
 When you see the robot and the costmaps appear in `rviz` you can start running demo. To demo Mode 1 (point-to-point navigation) run:
 ```bash
-cd ~/Glide/ws/src/glide_robot/scripts
+cd ~/Glide/ws/src/glide/scripts
 python3 mode1.py --traj_file experiment_A.json
 ```
 To demo Mode 2 (shared control mode), run:
 ```bash
-cd ~/Glide/ws/src/glide_robot/scripts
+cd ~/Glide/ws/src/glide/scripts
 python3 mode2.py
 ```
 

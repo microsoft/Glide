@@ -180,7 +180,7 @@ local_costmap:
     ros__parameters:
       update_frequency: 2.0 
       publish_frequency: 2.0
-      global_frame: map
+      global_frame: odom
       robot_base_frame: base_link
       use_sim_time: True
       rolling_window: true
@@ -405,12 +405,3 @@ map_server:
   ros__parameters:
     use_sim_time: True
     yaml_filename: "~/Glide/sim_ws/src/glide_robot/maps/99_hallway_sim.yaml"
-
-map_saver:
-  ros__parameters:
-    use_sim_time: True
-    save_map_timeout: 5000
-    free_thresh_default: 0.25
-    occupied_thresh_default: 0.65
-    map_subscribe_transient_local: False
-    save_map_timeout: 5000

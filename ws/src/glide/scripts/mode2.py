@@ -109,7 +109,7 @@ class Mode2(Node):
 
         print('Loading trajectories')
         self.trajectory_msgs = {}
-        traj_dir = ament_index_python.get_packages_with_prefixes()['glide_robot'].replace('install', 'src')
+        traj_dir = ament_index_python.get_packages_with_prefixes()['glide'].replace('install', 'src')
         for traj_idx, traj_dict in self.trajectories_dict.items():
             for traj_direction, traj_file in traj_dict.items():
                 if traj_file == '':

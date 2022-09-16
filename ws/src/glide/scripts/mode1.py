@@ -131,7 +131,7 @@ if __name__ == '__main__':
     parser.add_argument('--traj_file', help="Name of the file in the trajectories subdirectory")
     args = parser.parse_args()
 
-    traj_dir = ament_index_python.get_packages_with_prefixes()['glide_robot'].replace('install', 'src')
+    traj_dir = ament_index_python.get_packages_with_prefixes()['glide'].replace('install', 'src')
     with open(traj_dir + '/trajectories/' + args.traj_file) as f:
         json_msg = json.load(f)
 

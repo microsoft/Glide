@@ -106,7 +106,7 @@ def create_spline_traj(x, y):
     global_plan_json = message_converter.convert_ros_message_to_dictionary(global_plan)
 
     traj_name = input('Enter trajectory name: ')
-    traj_dir = ament_index_python.get_packages_with_prefixes()['glide_robot'].replace('install', 'src')
+    traj_dir = ament_index_python.get_packages_with_prefixes()['glide'].replace('install', 'src')
     out_path = traj_dir + '/trajectories/' + traj_name + '.json'
     with open(out_path, "w") as out:
         json.dump(global_plan_json, out)
