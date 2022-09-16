@@ -10,7 +10,7 @@ echo "./run.sh"
 echo
 echo "In another console:"
 echo "./connect.sh"
-echo "/ws/src/build_src.sh"
+echo "/ws/src/rebuild.sh"
 echo
 echo "To start glide:"
 echo "ros2 launch glide glide.launch.py"

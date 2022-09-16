@@ -5,7 +5,13 @@ repositories:
     version: main
   ros_qwiic_ICM_20948:
     type: git
-    url: https://github.com/polyhobbyist/ros_qwiic_ICM_20948
+    url: https://github.com/joncamp/ros_qwiic_ICM_20948
+  ros_qwiic_tof:
+    type: git
+    url: https://github.com/joncamp/ros_qwiic_tof
+  ros_qwiic_dual_encoder:
+    type: git
+    url: https://github.com/joncamp/ros_qwiic_dual_encoder
   microros_ws/src/micro_ros_setup:
     type: git
     url: https://github.com/micro-ROS/micro_ros_setup.git
