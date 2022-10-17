@@ -11,17 +11,6 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
-    # ros2 launch ros_qwiic_servo qwiic.launch.py
-    ros_qwiic_servo = Node(
-            package='ros_qwiic_servo',
-            executable='ros_qwiic_servo',
-            name='ros_qwiic_servo',
-            output='screen',
-            parameters=[
-               {'bus': '/dev/i2c-8'},
-            ]
-        )
-
     # ros2 launch realsense2_camera rs_launch.py
     realsense2_camera_dir = get_package_share_directory('realsense2_camera')
     realsense2_camera = IncludeLaunchDescription(
@@ -211,7 +200,6 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        ros_qwiic_servo,
         micro_ros_agent,
         cmdvel_to_servo,
         #torque_to_haptics, # uncomment if you want haptics all time
